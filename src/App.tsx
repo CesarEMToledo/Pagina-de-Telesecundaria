@@ -120,93 +120,256 @@ type Announcement = {
   calendarLocation?: string;
 };
 
+// Ayudantes de fechas para el contenido: a partir de la fecha ISO
+// ("2025-09-26") arman el texto largo ("Viernes 26 de septiembre de 2025")
+// para no escribirlo a mano en cada entrada (y evitar que el día de la
+// semana no coincida con la fecha).
+const DIAS_SEMANA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const partesFecha = (iso: string) => iso.split('-').map(Number) as [number, number, number];
+const fechaLarga = (iso: string) => {
+  const [y, m, d] = partesFecha(iso);
+  return `${DIAS_SEMANA[new Date(y, m - 1, d).getDay()]} ${d} de ${MESES[m - 1]} de ${y}`;
+};
+const fechaCorta = (iso: string) => {
+  const [y, m, d] = partesFecha(iso);
+  return `${d} de ${MESES[m - 1]} de ${y}`;
+};
+
+const diaMes = (iso: string) => {
+  const [, m, d] = partesFecha(iso);
+  return `${d} de ${MESES[m - 1]}`;
+};
+
+// Arma un aviso completo: solo hay que escribir la fecha ISO y el resto de
+// campos; el número del día y el texto largo de la fecha salen solos.
+const aviso = (a: Omit<Announcement, 'date' | 'dateLabel'>): Announcement => ({
+  ...a,
+  date: String(partesFecha(a.dateISO)[2]),
+  dateLabel: fechaLarga(a.dateISO),
+});
+
 const announcements: Announcement[] = [
-  {
+  aviso({
     label: 'Aviso General',
-    title: 'Suspensión de clases',
-    description: 'El próximo viernes 23 de mayo no habrá clases por Consejo Técnico Escolar.',
-    date: '23',
-    dateLabel: 'Viernes 23 de mayo de 2026',
-    dateISO: '2026-05-23',
-    tone: 'pink',
+    title: '¡Bienvenidos al ciclo escolar 2025-2026!',
+    description: 'El lunes 1 de septiembre iniciamos clases en primaria y secundaria. Conoce horarios, entrada y lo que necesitas el primer día.',
+    dateISO: '2025-09-01',
+    tone: 'blue',
     image: calendarImage,
     fullDescription: [
-      'Se informa a toda la comunidad educativa que el próximo viernes 23 de mayo no habrá clases debido a la realización del Consejo Técnico Escolar.',
-      'Las actividades escolares se reanudarán con normalidad el lunes 26 de mayo en el horario habitual.',
+      'Damos la más cordial bienvenida a estudiantes, familias y docentes al ciclo escolar 2025-2026. De acuerdo con el calendario oficial de la SEP, las clases inician el lunes 1 de septiembre de 2025 y concluyen el miércoles 15 de julio de 2026, con 185 días de clase.',
+      'Durante las primeras semanas realizaremos la evaluación diagnóstica en ambos niveles. No es un examen para calificar: nos sirve para saber desde dónde parte cada estudiante y planear el reforzamiento que necesita.',
+      'Primaria entra a las 8:00 AM y secundaria (telesecundaria) a las 7:30 AM. Los primeros días se permitirá que las familias de 1° de primaria acompañen a sus hijos hasta la puerta del salón.',
     ],
     bullets: [
-      'No habrá clases para todos los niveles educativos.',
-      'El personal docente y administrativo participará en el Consejo Técnico Escolar.',
-      'Agradecemos su comprensión y apoyo.',
+      'Primaria: entrada 8:00 AM, salida 1:00 PM.',
+      'Secundaria: entrada 7:30 AM, salida 1:40 PM.',
+      'Traer uniforme o ropa cómoda, lonche saludable y botella de agua.',
+      'Los libros de texto gratuitos se entregan en el salón durante la primera semana.',
     ],
-    fileName: 'Circular_CT_23_mayo_2026.pdf',
-    calendarType: 'suspension',
-  },
-  {
-    label: 'Evento',
-    title: 'Festival del Día del Estudiante',
-    description: 'Celebremos juntos una jornada llena de actividades, juegos y sorpresas.',
-    date: '16',
-    dateLabel: 'Sábado 16 de mayo de 2026',
-    dateISO: '2026-05-16',
-    tone: 'blue',
-    image: trophyImage,
-    fullDescription: [
-      'Como cada año, celebramos el Día del Estudiante con una jornada llena de juegos, concursos y sorpresas para toda la comunidad escolar.',
-      'Habrá actividades deportivas, culturales y reconocimientos para los alumnos destacados del ciclo escolar.',
-    ],
-    bullets: [
-      'El evento inicia a las 9:00 AM en la explanada principal.',
-      'Se pide a los alumnos asistir con ropa cómoda.',
-      'Padres de familia están cordialmente invitados a acompañarnos.',
-    ],
-    fileName: 'Programa_Festival_Estudiante.pdf',
+    fileName: 'Circular_Inicio_Ciclo_2025-2026.pdf',
     calendarType: 'evento',
-    calendarLocation: 'Explanada principal',
-  },
-  {
+    calendarLocation: 'Toda la escuela',
+  }),
+  aviso({
     label: 'Información',
-    title: 'Reunión con padres de familia',
-    description: 'Te esperamos para compartir los avances de nuestros estudiantes.',
-    date: '26',
-    dateLabel: 'Martes 26 de mayo de 2026',
-    dateISO: '2026-05-26',
-    tone: 'green',
-    image: familyImage,
-    fullDescription: [
-      'Te esperamos para compartir los avances académicos de nuestros estudiantes durante este periodo escolar.',
-      'Es muy importante contar con la asistencia de al menos un padre, madre o tutor de cada alumno.',
-    ],
-    bullets: [
-      'La reunión será por grupo, en el salón correspondiente.',
-      'Se entregará el reporte de avances individual de cada alumno.',
-      'Duración aproximada: 45 minutos por grupo.',
-    ],
-    fileName: 'Citatorio_Reunion_Padres.pdf',
-    calendarType: 'reunion',
-    calendarLocation: 'Salón correspondiente',
-  },
-  {
-    label: 'Información',
-    title: 'Material escolar',
-    description: 'Revisa los materiales necesarios para las próximas actividades en clase.',
-    date: '30',
-    dateLabel: 'Sábado 30 de mayo de 2026',
-    dateISO: '2026-05-30',
+    title: 'Lista de útiles: primaria y secundaria',
+    description: 'Materiales básicos por nivel. Reutiliza lo que ya tengas en casa: no se pide ningún producto de marca específica.',
+    dateISO: '2025-09-05',
     tone: 'yellow',
     image: notebookImage,
     fullDescription: [
-      'Revisa la lista de materiales necesarios para las próximas actividades en clase, correspondientes al cierre del ciclo escolar.',
-      'Se recomienda adquirir los materiales con anticipación para no afectar el desarrollo de las actividades.',
+      'Compartimos la lista de materiales básicos por nivel. Te pedimos reutilizar cuadernos, colores y mochilas del ciclo anterior siempre que estén en buen estado. Ninguna escuela pública puede condicionar la inscripción o la entrada al salón a la compra de útiles o uniformes.',
+      'Los libros de texto gratuitos de la Nueva Escuela Mexicana (en primaria: Proyectos de Aula, Proyectos Escolares, Proyectos Comunitarios, Nuestros Saberes y Múltiples Lenguajes) se entregan en la escuela sin costo. Te pedimos forrarlos y marcarlos con el nombre del estudiante.',
     ],
     bullets: [
-      'Cuaderno, colores y material de manualidades.',
-      'El material se utilizará a partir de la próxima semana.',
-      'Cualquier duda, favor de contactar a la maestra titular.',
+      '1° y 2° de primaria: 2 cuadernos de cuadro grande, lápiz, goma, sacapuntas, colores y tijeras de punta roma.',
+      '3° a 6° de primaria: 3 cuadernos (cuadro chico y raya), juego de geometría y diccionario escolar.',
+      'Secundaria: un cuaderno por campo formativo, calculadora básica, juego de geometría y memoria USB (opcional).',
+      'Material compartido del grupo: se acordará en la primera reunión con familias.',
     ],
-    fileName: 'Lista_Material_Escolar.pdf',
+    fileName: 'Lista_Utiles_2025-2026.pdf',
     calendarType: 'entrega',
-  },
+  }),
+  aviso({
+    label: 'Aviso General',
+    title: 'Suspensión de clases por Consejo Técnico Escolar',
+    description: 'El viernes 26 de septiembre no hay clases: el personal docente participa en la primera sesión ordinaria del CTE.',
+    dateISO: '2025-09-26',
+    tone: 'pink',
+    image: calendarImage,
+    fullDescription: [
+      'El Consejo Técnico Escolar (CTE) es el espacio donde el colectivo docente analiza el avance de los estudiantes, toma acuerdos y ajusta el Programa Analítico de la escuela. Por eso, el último viernes de cada mes (en los meses que marca el calendario oficial) no hay clases.',
+      'En este ciclo, las sesiones ordinarias del CTE son: 26 de septiembre, 31 de octubre y 28 de noviembre de 2025; 30 de enero, 27 de febrero, 27 de marzo, 29 de mayo y 26 de junio de 2026. Todas aparecen en nuestro Calendario Escolar.',
+    ],
+    bullets: [
+      'No hay clases en primaria ni en secundaria.',
+      'Las clases se reanudan el lunes 29 de septiembre en horario habitual.',
+      'Te recomendamos agendar desde hoy las 8 fechas de CTE del ciclo.',
+    ],
+    fileName: 'Circular_CTE_26_sep_2025.pdf',
+    calendarType: 'suspension',
+  }),
+  aviso({
+    label: 'Información',
+    title: 'Reunión de familias: resultados del diagnóstico',
+    description: 'Compartiremos cómo inició cada grupo en lectura, escritura y matemáticas, y el plan de reforzamiento del primer trimestre.',
+    dateISO: '2025-10-08',
+    tone: 'green',
+    image: familyImage,
+    fullDescription: [
+      'Te esperamos para platicar sobre los resultados de la evaluación diagnóstica. En primaria revisamos fluidez y comprensión lectora, producción de textos y cálculo; en secundaria, comprensión lectora, resolución de problemas y hábitos de estudio.',
+      'Cada docente explicará qué va a reforzar en el grupo durante el primer trimestre y cómo pueden apoyar desde casa con actividades sencillas de 15 a 20 minutos al día.',
+    ],
+    bullets: [
+      'Primaria: 8:00 AM en el salón de cada grupo.',
+      'Secundaria: 12:30 PM en el aula de medios.',
+      'Duración aproximada: 45 minutos.',
+      'Se firmará la carta compromiso de acompañamiento en casa.',
+    ],
+    fileName: 'Citatorio_Reunion_Diagnostico.pdf',
+    calendarType: 'reunion',
+    calendarLocation: 'Salón de cada grupo',
+  }),
+  aviso({
+    label: 'Información',
+    title: 'Vida saludable: reglas de alimentación en la escuela',
+    description: 'Recordatorio: en las escuelas de educación básica no se venden alimentos ultraprocesados ni bebidas azucaradas.',
+    dateISO: '2025-10-15',
+    tone: 'green',
+    image: familyImage,
+    fullDescription: [
+      'Desde el 29 de marzo de 2025 están en vigor los lineamientos generales de alimentación escolar de la estrategia “Vive saludable, vive feliz”, que prohíben la venta de productos con sellos de advertencia (comida chatarra y bebidas azucaradas) dentro de las escuelas de educación básica.',
+      'La escuela promueve el consumo de agua simple, frutas, verduras y alimentos preparados en casa. Te compartimos ideas de lonche económico y nutritivo en el boletín del mes.',
+    ],
+    bullets: [
+      'La cooperativa solo ofrece alimentos sin sellos de advertencia.',
+      'Preferir agua simple en lugar de jugos o refrescos.',
+      'Ideas de lonche: tacos de frijol, fruta picada, pepino con limón, huevo cocido.',
+    ],
+    fileName: 'Lineamientos_Alimentacion_Escolar.pdf',
+    calendarType: 'evento',
+  }),
+  aviso({
+    label: 'Información',
+    title: 'Entrega de boletas del primer periodo',
+    description: 'Reunión por grupo para entregar calificaciones del primer trimestre y acordar metas para el segundo.',
+    dateISO: '2025-12-05',
+    tone: 'green',
+    image: familyImage,
+    fullDescription: [
+      'Con base en la evaluación formativa del primer trimestre, cada docente entregará la boleta y un reporte breve con fortalezas y áreas de oportunidad del estudiante.',
+      'Pedimos la asistencia de madre, padre o tutor. Si no puedes asistir, acércate con la maestra o maestro titular para agendar otro horario.',
+    ],
+    bullets: [
+      'Primaria: 12:00 PM · Secundaria: 1:00 PM.',
+      'Se revisarán las evidencias del portafolio del estudiante.',
+      'Se acordará una meta concreta para el segundo trimestre.',
+    ],
+    fileName: 'Citatorio_Entrega_Boletas_1er_Periodo.pdf',
+    calendarType: 'entrega',
+    calendarLocation: 'Salón de cada grupo',
+  }),
+  aviso({
+    label: 'Aviso General',
+    title: 'Vacaciones de invierno',
+    description: 'Del 22 de diciembre al 6 de enero no hay clases. Regresamos el lunes 12 de enero de 2026.',
+    dateISO: '2025-12-19',
+    tone: 'pink',
+    image: calendarImage,
+    fullDescription: [
+      'El viernes 19 de diciembre es el último día de clases de 2025. El periodo vacacional de invierno va del 22 de diciembre de 2025 al 6 de enero de 2026.',
+      'Del 7 al 9 de enero el personal docente participa en el Taller Intensivo de formación continua, por lo que los estudiantes regresan a clases el lunes 12 de enero de 2026.',
+    ],
+    bullets: [
+      'Último día de clases: viernes 19 de diciembre.',
+      'Regreso de estudiantes: lunes 12 de enero de 2026.',
+      'Sugerencia para vacaciones: leer 20 minutos diarios en familia.',
+    ],
+    fileName: 'Circular_Vacaciones_Invierno.pdf',
+    calendarType: 'festivo',
+  }),
+  aviso({
+    label: 'Información',
+    title: 'Preinscripciones para el ciclo 2026-2027',
+    description: 'Si tu hija o hijo entra a 1° de primaria o a 1° de secundaria el próximo ciclo, este es el momento de preinscribirlo.',
+    dateISO: '2026-02-03',
+    tone: 'yellow',
+    image: notebookImage,
+    fullDescription: [
+      'Durante febrero se abre el periodo de preinscripciones para el ciclo escolar 2026-2027 en educación básica. Aplica para quienes ingresan a 1° de primaria, a 1° de secundaria, o cambian de escuela.',
+      'Las fechas exactas y la plataforma de registro dependen de cada entidad; en Dirección te ayudamos a completar el trámite. Los estudiantes de 6° de nuestra escuela tienen lugar asegurado en 1° de secundaria, pero también deben registrarse.',
+    ],
+    bullets: [
+      'Documentos: acta de nacimiento, CURP, comprobante de domicilio y boleta del último grado cursado.',
+      'Edad para 1° de primaria: 6 años cumplidos al 31 de diciembre de 2026.',
+      'La preinscripción en escuelas públicas no tiene costo.',
+    ],
+    fileName: 'Guia_Preinscripciones_2026-2027.pdf',
+    calendarType: 'entrega',
+    calendarLocation: 'Dirección escolar',
+  }),
+  aviso({
+    label: 'Evento',
+    title: 'Festival del Día de la Niña y el Niño',
+    description: 'Una mañana de juegos, talleres y convivencia para estudiantes de primaria y secundaria.',
+    dateISO: '2026-04-30',
+    tone: 'blue',
+    image: trophyImage,
+    fullDescription: [
+      'Celebramos el 30 de abril con una jornada de juegos tradicionales, talleres, música y convivencia. Los estudiantes de secundaria organizan y dirigen varias de las estaciones de juego para los grupos de primaria.',
+      'Es también un día para recordar los derechos de niñas, niños y adolescentes: a jugar, a aprender, a participar y a ser escuchados.',
+    ],
+    bullets: [
+      'Inicia a las 9:00 AM en la explanada principal.',
+      'Asistir con ropa cómoda (no es necesario uniforme).',
+      'Las familias están invitadas a partir de las 11:00 AM.',
+    ],
+    fileName: 'Programa_Dia_Nina_Nino_2026.pdf',
+    calendarType: 'evento',
+    calendarLocation: 'Explanada principal',
+  }),
+  aviso({
+    label: 'Información',
+    title: 'Entrega de documentación de fin de ciclo',
+    description: 'Fechas para recoger boletas finales y certificados de 6° de primaria y 3° de secundaria.',
+    dateISO: '2026-07-08',
+    tone: 'yellow',
+    image: notebookImage,
+    fullDescription: [
+      'Al cierre del ciclo se entregan las boletas finales de todos los grados. Los estudiantes que concluyen 6° de primaria y 3° de secundaria reciben además su certificado de terminación de estudios.',
+      'Revisa que el nombre y la CURP del estudiante estén escritos correctamente antes de firmar de recibido.',
+    ],
+    bullets: [
+      'Boletas de 1° a 5° de primaria y 1° y 2° de secundaria: en el salón de cada grupo.',
+      'Certificados de 6° y 3°: en Dirección escolar.',
+      'Traer identificación oficial de madre, padre o tutor.',
+    ],
+    fileName: 'Circular_Documentacion_Fin_Ciclo.pdf',
+    calendarType: 'entrega',
+    calendarLocation: 'Dirección escolar',
+  }),
+  aviso({
+    label: 'Evento',
+    title: 'Ceremonia de fin de cursos',
+    description: 'Despedimos a la generación que concluye 6° de primaria y 3° de secundaria. ¡Toda la comunidad está invitada!',
+    dateISO: '2026-07-10',
+    tone: 'blue',
+    image: trophyImage,
+    fullDescription: [
+      'Con una ceremonia sencilla y significativa celebramos a los estudiantes que concluyen una etapa: quienes pasan de la primaria a la secundaria y quienes inician la educación media superior.',
+      'Habrá honores a la bandera, entrega simbólica de documentos, reconocimiento a la generación y un mensaje de las y los estudiantes.',
+    ],
+    bullets: [
+      'Inicia a las 9:00 AM en la explanada principal.',
+      'Estudiantes de la generación: uniforme de gala.',
+      'Máximo 3 acompañantes por estudiante por cuestión de espacio.',
+    ],
+    fileName: 'Programa_Ceremonia_Fin_Cursos_2026.pdf',
+    calendarType: 'evento',
+    calendarLocation: 'Explanada principal',
+  }),
 ];
 
 // El carrusel principal y "Próximos avisos" solo muestran los 4 avisos
@@ -268,6 +431,12 @@ type Newsletter = {
   description: string;
   messageQuote: string;
   messageAuthor: string;
+  // Entrada tipo blog (opcional): secciones con subtítulo y párrafos. Es
+  // lo que convierte al boletín en una guía útil para docentes de otras
+  // escuelas; se muestra en la página y también se incluye en el PDF.
+  article?: { heading: string; paragraphs: string[] }[];
+  // Ideas concretas para llevar al aula (opcional).
+  classroomTips?: string[];
   highlights: { title: string; description: string; image: string }[];
   bullets: string[];
   fileName: string;
@@ -278,108 +447,460 @@ type Newsletter = {
 
 const newsletters: Newsletter[] = [
   {
-    title: 'Boletín Escolar - Mayo 2026',
-    monthLabel: 'Mayo 2026',
-    dateLabel: '30 de mayo de 2026',
-    dateISO: '2026-05-30',
-    tone: 'purple',
-    category: 'Comunicados generales',
-    description: 'Conoce las actividades, anuncios importantes y logros de nuestra comunidad educativa durante el mes de mayo.',
-    messageQuote: 'Gracias al esfuerzo conjunto de estudiantes, docentes y familias, seguimos construyendo una comunidad educativa fuerte, unida y en constante crecimiento.',
-    messageAuthor: 'Dirección Académica',
+    title: 'Boletín Escolar - Septiembre 2025: Evaluación diagnóstica que sí sirve',
+    monthLabel: 'Septiembre 2025',
+    dateLabel: fechaCorta('2025-09-30'),
+    dateISO: '2025-09-30',
+    tone: 'blue',
+    category: 'Guía docente',
+    description: 'Cómo diseñamos una evaluación diagnóstica breve para primaria y secundaria, y cómo la convertimos en un plan de reforzamiento real.',
+    messageQuote: 'Un diagnóstico no sirve para etiquetar a nadie: sirve para saber por dónde empezar con cada estudiante.',
+    messageAuthor: 'Dirección escolar',
+    article: [
+      {
+        heading: 'Menos pruebas, más información útil',
+        paragraphs: [
+          'En lugar de aplicar exámenes largos, decidimos evaluar solo tres cosas en las dos primeras semanas: lectura (fluidez y comprensión), escritura (un texto breve libre) y pensamiento matemático (cálculo y resolución de un problema). Con eso tenemos un panorama suficiente para planear el primer trimestre.',
+          'En 1° y 2° de primaria, la lectura se evalúa de forma individual, con el estudiante leyendo en voz alta un texto corto. De 3° de primaria a 3° de secundaria, registramos palabras por minuto con un texto adecuado al grado y hacemos tres preguntas de comprensión: una literal, una inferencial y una de opinión.',
+        ],
+      },
+      {
+        heading: 'Referentes para la fluidez lectora',
+        paragraphs: [
+          'Como punto de partida usamos los rangos de los Estándares Nacionales de Habilidad Lectora que publicó la SEP: aproximadamente 35 a 59 palabras por minuto al final de 1° de primaria, 85 a 99 en 3°, 115 a 124 en 5° y alrededor de 155 a 160 al terminar 3° de secundaria. No son metas absolutas, pero ayudan a detectar quién necesita apoyo urgente.',
+          'Lo más importante no es la velocidad, sino que el estudiante entienda lo que lee. Un alumno que lee rápido pero no puede contar de qué trató el texto necesita un tipo de apoyo distinto al de uno que lee despacio pero comprende.',
+        ],
+      },
+      {
+        heading: 'Del dato al plan',
+        paragraphs: [
+          'Con los resultados formamos tres grupos de apoyo por nivel (requiere apoyo, en desarrollo, esperado) y los registramos en una tabla sencilla. Cada docente eligió una sola prioridad para el primer trimestre y la compartió en la sesión del Consejo Técnico Escolar.',
+          'En secundaria, además, aplicamos un breve cuestionario de hábitos de estudio y bienestar, porque en telesecundaria un mismo docente atiende todas las asignaturas del grupo y conoce de cerca las condiciones de cada estudiante.',
+        ],
+      },
+    ],
+    classroomTips: [
+      'Usa un solo texto por grado y cronometra 1 minuto de lectura: es rápido y confiable.',
+      'Guarda el texto escrito del diagnóstico en el portafolio: al final del ciclo compáralo con uno nuevo.',
+      'Comparte con las familias solo 1 o 2 acciones concretas para apoyar en casa.',
+    ],
     highlights: [
-      { title: 'Feria de Ciencias', description: 'Nuestros estudiantes presentaron proyectos increíbles en la Feria de Ciencias. ¡Felicidades a todos!', image: galleryCiencias },
-      { title: 'Convivencia deportiva', description: 'Compartimos una jornada de juegos y trabajo en equipo entre todos los grupos.', image: galleryDeportes },
-      { title: 'Honores a la bandera', description: 'Reforzamos nuestros valores cívicos con la ceremonia mensual de honores a la bandera.', image: galleryCivismo },
+      { title: 'Fiestas patrias', description: 'Primaria y secundaria celebraron la Independencia con una muestra de juegos y comida tradicional.', image: galleryCivismo },
+      { title: 'Simulacro Nacional', description: 'Participamos en el Simulacro Nacional del 19 de septiembre con una evacuación ordenada en menos de 3 minutos.', image: galleryDeportes },
+      { title: 'Evaluación diagnóstica', description: 'Todos los grupos concluyeron su diagnóstico de lectura, escritura y matemáticas.', image: galleryLectura },
     ],
     bullets: [
-      'Suspensión de clases el viernes 23 de mayo por Consejo Técnico Escolar.',
-      'Festival del Día del Estudiante el sábado 16 de mayo.',
-      'Reunión con padres de familia el martes 26 de mayo.',
-      'Revisión de materiales escolares para el cierre del ciclo.',
+      'Inicio de clases: 1 de septiembre de 2025.',
+      'Suspensión por día festivo: martes 16 de septiembre.',
+      'Primera sesión de CTE (sin clases): viernes 26 de septiembre.',
+      'Reunión de resultados del diagnóstico: 8 de octubre.',
+    ],
+    fileName: 'boletin_septiembre_2025.pdf',
+    fileSize: '1.8 MB',
+    pages: 6,
+    publishedBy: 'Dirección escolar',
+  },
+  {
+    title: 'Boletín Escolar - Octubre 2025: El Programa Analítico paso a paso',
+    monthLabel: 'Octubre 2025',
+    dateLabel: fechaCorta('2025-10-30'),
+    dateISO: '2025-10-30',
+    tone: 'purple',
+    category: 'Guía docente',
+    description: 'Cómo construimos en colectivo el Programa Analítico de la escuela a partir de los programas sintéticos del Plan de Estudios 2022.',
+    messageQuote: 'El programa analítico no es un documento para entregar: es el acuerdo de todo el colectivo sobre qué necesita aprender nuestra comunidad.',
+    messageAuthor: 'Dirección escolar',
+    article: [
+      {
+        heading: '¿Qué es el Programa Analítico?',
+        paragraphs: [
+          'En el Plan de Estudios 2022 de la Nueva Escuela Mexicana, la SEP entrega programas sintéticos con los contenidos y procesos de desarrollo de aprendizaje (PDA) de cada fase. Cada escuela, en su Consejo Técnico, los adapta a su realidad: eso es el Programa Analítico.',
+          'Se construye en tres planos: primero, la lectura de la realidad (qué pasa en la comunidad, qué problemas y saberes locales hay); segundo, la contextualización (qué contenidos del programa sintético se relacionan con esa realidad); y tercero, el codiseño (contenidos propios que la escuela agrega).',
+        ],
+      },
+      {
+        heading: 'Cómo lo hicimos en una escuela con primaria y telesecundaria',
+        paragraphs: [
+          'Hicimos un ejercicio de diagnóstico comunitario con estudiantes de 5°, 6° y secundaria: entrevistaron a sus familias sobre los problemas de la comunidad. Los tres temas más mencionados fueron el manejo de la basura, el cuidado del agua y la falta de espacios para jugar.',
+          'Después, cada docente buscó en su programa sintético los contenidos que ayudan a trabajar esos temas. En primaria (Fases 3, 4 y 5) y en secundaria (Fase 6) encontramos contenidos en los cuatro campos formativos, lo que nos permitió diseñar un proyecto escolar común con actividades distintas por grado.',
+        ],
+      },
+      {
+        heading: 'Errores que evitamos',
+        paragraphs: [
+          'No copiamos programas analíticos de internet: cada comunidad es distinta. Tampoco intentamos contextualizar todos los contenidos a la vez; elegimos pocos problemas y los trabajamos a fondo durante el ciclo.',
+          'El documento se revisa en cada sesión de CTE: si algo no funciona en el aula, se ajusta. Es un documento vivo.',
+        ],
+      },
+    ],
+    classroomTips: [
+      'Empieza por una pregunta sencilla a tus estudiantes: ¿qué te gustaría cambiar de tu comunidad?',
+      'Usa una tabla de 3 columnas: problema de la comunidad · contenido del programa · proyecto posible.',
+      'Relaciona cada proyecto con al menos un eje articulador (por ejemplo, vida saludable o pensamiento crítico).',
+    ],
+    highlights: [
+      { title: 'Diagnóstico comunitario', description: 'Estudiantes de secundaria entrevistaron a más de 60 familias sobre los retos de la comunidad.', image: galleryCivismo },
+      { title: 'Huerto escolar', description: 'Arrancamos el huerto escolar como proyecto comunitario de primaria y secundaria.', image: galleryCiencias },
+      { title: 'Ofrenda en construcción', description: 'Los grupos iniciaron la investigación para la ofrenda de Día de Muertos.', image: galleryArte },
+    ],
+    bullets: [
+      'Reunión de resultados del diagnóstico: 8 de octubre.',
+      'Arranque del proyecto de huerto escolar: 20 de octubre.',
+      'Ofrenda y calaveritas literarias: jueves 30 de octubre.',
+      'Sesión de CTE (sin clases): viernes 31 de octubre.',
+    ],
+    fileName: 'boletin_octubre_2025.pdf',
+    fileSize: '2.0 MB',
+    pages: 7,
+    publishedBy: 'Dirección escolar',
+  },
+  {
+    title: 'Boletín Escolar - Noviembre 2025: Tradiciones como proyecto interdisciplinario',
+    monthLabel: 'Noviembre 2025',
+    dateLabel: fechaCorta('2025-11-27'),
+    dateISO: '2025-11-27',
+    tone: 'orange',
+    category: 'Eventos especiales',
+    description: 'Día de Muertos, la Revolución Mexicana y el Día Naranja: cómo convertir las fechas del calendario cívico en aprendizajes de varios campos formativos.',
+    messageQuote: 'Las fechas cívicas y las tradiciones son una oportunidad para aprender historia, lengua, arte y ciencia al mismo tiempo.',
+    messageAuthor: 'Dirección escolar',
+    article: [
+      {
+        heading: 'La ofrenda como proyecto, no solo como adorno',
+        paragraphs: [
+          'Cada grupo investigó el significado de un elemento de la ofrenda (el agua, la sal, el cempasúchil, el papel picado, el pan). En primaria, los más pequeños dibujaron y explicaron oralmente; en 3° y 4° escribieron fichas informativas; en 5°, 6° y secundaria redactaron textos expositivos y calaveritas literarias.',
+          'En secundaria, además, se trabajó el origen prehispánico y colonial de la tradición (Historia), la química del papel y los pigmentos naturales (Ciencias) y la medición y el presupuesto del montaje (Matemáticas). Así un mismo proyecto toca los cuatro campos formativos.',
+        ],
+      },
+      {
+        heading: '20 de noviembre: más allá del desfile',
+        paragraphs: [
+          'Además de la tabla rítmica, cada grupo de secundaria preparó una línea del tiempo ilustrada de la Revolución Mexicana y la presentó a un grupo de primaria. Enseñar a otros es una de las formas más efectivas de aprender.',
+        ],
+      },
+      {
+        heading: 'Día Naranja: igualdad de género en el aula',
+        paragraphs: [
+          'Cada día 25 del mes se conmemora el Día Naranja, promovido por ONU Mujeres para prevenir la violencia contra mujeres y niñas; el 25 de noviembre es además el Día Internacional de la Eliminación de la Violencia contra la Mujer. Trabajamos con actividades por nivel: en primaria, reparto justo de tareas en casa y en el salón; en secundaria, análisis de estereotipos en publicidad y canciones.',
+        ],
+      },
+    ],
+    classroomTips: [
+      'Asigna a cada grupo un elemento de la ofrenda y pídeles una “ficha de museo” para explicarlo.',
+      'Las calaveritas literarias son ideales para practicar rima y métrica en 4° a 6° y en secundaria.',
+      'Pide a secundaria que enseñe un tema a primaria: preparan mejor y los pequeños aprenden de un modelo cercano.',
+    ],
+    highlights: [
+      { title: 'Ofrenda monumental', description: 'Primaria y secundaria montaron juntas la ofrenda con fichas explicativas hechas por los estudiantes.', image: galleryArte },
+      { title: 'Tabla rítmica', description: 'Los grupos presentaron la tabla rítmica por el aniversario de la Revolución Mexicana.', image: galleryDeportes },
+      { title: 'Día Naranja', description: 'Toda la escuela vistió de naranja y participó en actividades por la igualdad.', image: galleryCivismo },
+    ],
+    bullets: [
+      'Suspensión por día festivo: lunes 17 de noviembre.',
+      'Día Naranja: martes 25 de noviembre.',
+      'Sesión de CTE (sin clases): viernes 28 de noviembre.',
+      'Entrega de boletas del primer periodo: 5 de diciembre.',
+    ],
+    fileName: 'boletin_noviembre_2025.pdf',
+    fileSize: '2.3 MB',
+    pages: 8,
+    publishedBy: 'Dirección escolar',
+  },
+  {
+    title: 'Boletín Escolar - Diciembre 2025: Evaluación formativa y retroalimentación',
+    monthLabel: 'Diciembre 2025',
+    dateLabel: fechaCorta('2025-12-18'),
+    dateISO: '2025-12-18',
+    tone: 'green',
+    category: 'Logros y reconocimientos',
+    description: 'Cerramos el primer periodo con un balance de avances y compartimos cómo usamos la retroalimentación para que la calificación no sea lo único que importa.',
+    messageQuote: 'La calificación dice dónde está un estudiante; la retroalimentación le dice cómo avanzar.',
+    messageAuthor: 'Dirección escolar',
+    article: [
+      {
+        heading: 'Evaluar para aprender',
+        paragraphs: [
+          'En la Nueva Escuela Mexicana la evaluación es principalmente formativa: se observa el proceso, se registran evidencias y se da retroalimentación durante el trimestre, no solo al final. La calificación de la boleta resume ese proceso.',
+          'Las revisiones de la Education Endowment Foundation (Reino Unido) ubican la retroalimentación de calidad entre las prácticas con mayor impacto y menor costo: en promedio equivale a unos seis meses adicionales de avance en un año escolar.',
+        ],
+      },
+      {
+        heading: 'Cómo damos retroalimentación en grupos grandes',
+        paragraphs: [
+          'Usamos la técnica de “dos estrellas y un deseo”: dos cosas que el estudiante hizo bien y una concreta que puede mejorar. En secundaria, los estudiantes también se evalúan entre pares con una rúbrica sencilla de tres niveles.',
+          'Para que la retroalimentación sirva, el estudiante debe tener oportunidad de usarla: reservamos 10 minutos para que corrijan o mejoren su trabajo en la misma semana.',
+        ],
+      },
+    ],
+    classroomTips: [
+      'Retroalimenta sobre la tarea, no sobre la persona (“tu conclusión no usa datos”, en vez de “no eres bueno en ciencias”).',
+      'Una rúbrica de 3 niveles con ejemplos es más útil que una de 5 niveles sin ejemplos.',
+      'Pide al estudiante que escriba qué hará distinto la próxima vez.',
+    ],
+    highlights: [
+      { title: 'Cuadro de honor', description: 'Reconocimos a estudiantes por mejora, constancia y compañerismo, no solo por promedio.', image: galleryMatematicas },
+      { title: 'Posada escolar', description: 'Cerramos el año con una convivencia organizada por la asociación de familias.', image: galleryArte },
+      { title: 'Portafolios', description: 'Cada estudiante presentó a su familia su portafolio de evidencias del trimestre.', image: galleryLectura },
+    ],
+    bullets: [
+      'Entrega de boletas: viernes 5 de diciembre.',
+      'Último día de clases del año: viernes 19 de diciembre.',
+      'Vacaciones: del 22 de diciembre al 6 de enero.',
+      'Regreso de estudiantes: lunes 12 de enero de 2026.',
+    ],
+    fileName: 'boletin_diciembre_2025.pdf',
+    fileSize: '1.9 MB',
+    pages: 6,
+    publishedBy: 'Dirección escolar',
+  },
+  {
+    title: 'Boletín Escolar - Enero 2026: Las cuatro metodologías sociocríticas',
+    monthLabel: 'Enero 2026',
+    dateLabel: fechaCorta('2026-01-29'),
+    dateISO: '2026-01-29',
+    tone: 'purple',
+    category: 'Guía docente',
+    description: 'Guía práctica de las metodologías que sugiere el Plan de Estudios 2022: cuándo usar cada una y un ejemplo para primaria y otro para secundaria.',
+    messageQuote: 'No hay una metodología mejor que otra: hay una más adecuada para lo que queremos que los estudiantes aprendan.',
+    messageAuthor: 'Coordinación académica',
+    article: [
+      {
+        heading: '1. Aprendizaje basado en proyectos comunitarios (Lenguajes)',
+        paragraphs: [
+          'Se organiza en tres fases: planeación (identificar la necesidad y planear), acción (acercarse, comprender, producir y reconocer) e intervención (integrar, difundir y evaluar). Ejemplo en primaria: crear un periódico mural sobre las recetas tradicionales de la comunidad. En secundaria: producir un podcast con entrevistas a personas mayores sobre la historia local.',
+        ],
+      },
+      {
+        heading: '2. Indagación con enfoque STEAM (Saberes y Pensamiento Científico)',
+        paragraphs: [
+          'Parte de una pregunta que los estudiantes pueden investigar: introducción al tema, diseño de la investigación, organización y análisis de datos, presentación de resultados y metacognición. Ejemplo en primaria: ¿por qué unas plantas del huerto crecen más que otras? En secundaria: ¿qué tan limpia está el agua que llega a la escuela?',
+        ],
+      },
+      {
+        heading: '3. Aprendizaje basado en problemas (Ética, Naturaleza y Sociedades)',
+        paragraphs: [
+          'Se presenta un problema real y abierto, los estudiantes lo analizan, investigan, proponen soluciones y las evalúan. Ejemplo en primaria: el salón siempre queda sucio después del recreo. En secundaria: cómo reducir la basura que genera la comunidad escolar.',
+        ],
+      },
+      {
+        heading: '4. Aprendizaje servicio (De lo Humano y lo Comunitario)',
+        paragraphs: [
+          'Los estudiantes aprenden mientras realizan un servicio útil para su comunidad: punto de partida, lo que sé y lo que quiero saber, organización, vivir la experiencia y valoración. Ejemplo en primaria: una campaña de lavado de manos para preescolar. En secundaria: un círculo de lectura para estudiantes de 1° y 2° de primaria.',
+        ],
+      },
+    ],
+    classroomTips: [
+      'Elige la metodología según el campo formativo principal del proyecto, pero no te limites: se pueden combinar.',
+      'Un proyecto bien hecho de 3 semanas vale más que tres proyectos apresurados.',
+      'Cierra siempre con metacognición: ¿qué aprendí?, ¿cómo lo aprendí?, ¿para qué me sirve?',
+    ],
+    highlights: [
+      { title: 'Taller intensivo', description: 'El colectivo docente trabajó del 7 al 9 de enero en la mejora de sus proyectos.', image: galleryLectura },
+      { title: 'Círculos de estudio', description: 'Iniciamos la tutoría entre pares: secundaria apoya a primaria en lectura.', image: galleryCiencias },
+      { title: 'Regreso a clases', description: 'Recibimos a los estudiantes con una semana de repaso y reencuentro.', image: galleryDeportes },
+    ],
+    bullets: [
+      'Regreso a clases: lunes 12 de enero.',
+      'Inicio de círculos de estudio entre pares: 21 de enero.',
+      'Sesión de CTE (sin clases): viernes 30 de enero.',
+      'Suspensión por día festivo: lunes 2 de febrero.',
+    ],
+    fileName: 'boletin_enero_2026.pdf',
+    fileSize: '2.2 MB',
+    pages: 8,
+    publishedBy: 'Coordinación académica',
+  },
+  {
+    title: 'Boletín Escolar - Febrero 2026: Leer todos los días',
+    monthLabel: 'Febrero 2026',
+    dateLabel: fechaCorta('2026-02-26'),
+    dateISO: '2026-02-26',
+    tone: 'orange',
+    category: 'Actividades escolares',
+    description: 'Día de la Bandera, Día Internacional de la Lengua Materna y nuestra estrategia de 20 minutos diarios de lectura en toda la escuela.',
+    messageQuote: 'Un estudiante que lee todos los días tiene en sus manos la llave de todas las demás materias.',
+    messageAuthor: 'Dirección escolar',
+    article: [
+      {
+        heading: '20 minutos que cambian el día',
+        paragraphs: [
+          'Desde febrero, toda la escuela dedica los primeros 20 minutos después del recreo a la lectura. En 1° y 2° de primaria el docente lee en voz alta y conversa con el grupo; de 3° a 6° alternamos lectura en voz alta, lectura en parejas y lectura independiente; en secundaria cada estudiante elige un libro de la biblioteca de aula.',
+          'La lectura en voz alta por parte del docente es valiosa en todos los grados, también en secundaria: modela la entonación, amplía el vocabulario y despierta el gusto por los textos que los estudiantes todavía no pueden leer solos.',
+        ],
+      },
+      {
+        heading: 'Lengua materna e interculturalidad',
+        paragraphs: [
+          'El 21 de febrero es el Día Internacional de la Lengua Materna, proclamado por la UNESCO. En México se reconocen 68 lenguas indígenas nacionales. Invitamos a familias hablantes a compartir palabras, cuentos y canciones, y los estudiantes elaboraron un pequeño diccionario ilustrado.',
+        ],
+      },
+    ],
+    classroomTips: [
+      'Lee en voz alta a tu grupo al menos 3 veces por semana, sin importar el grado.',
+      'Deja que los estudiantes abandonen un libro que no les gusta: el objetivo es crear lectores.',
+      'Registra en una tabla cuántos libros lee el grupo al mes y celebra las metas colectivas.',
+    ],
+    highlights: [
+      { title: 'Día de la Bandera', description: 'Abanderamiento de la nueva escolta con la participación de primaria y secundaria.', image: galleryCivismo },
+      { title: 'Lengua materna', description: 'Familias compartieron cuentos y canciones en lenguas originarias.', image: galleryLectura },
+      { title: 'Asamblea escolar', description: 'Secundaria presentó propuestas para reducir la basura en la escuela.', image: galleryCiencias },
+    ],
+    bullets: [
+      'Preinscripciones ciclo 2026-2027: durante febrero.',
+      'Asamblea escolar sobre residuos: 18 de febrero.',
+      'Día de la Bandera: martes 24 de febrero.',
+      'Sesión de CTE (sin clases): viernes 27 de febrero.',
+    ],
+    fileName: 'boletin_febrero_2026.pdf',
+    fileSize: '1.7 MB',
+    pages: 6,
+    publishedBy: 'Dirección escolar',
+  },
+  {
+    title: 'Boletín Escolar - Marzo 2026: Estrategias para aula multigrado y telesecundaria',
+    monthLabel: 'Marzo 2026',
+    dateLabel: fechaCorta('2026-03-26'),
+    dateISO: '2026-03-26',
+    tone: 'blue',
+    category: 'Guía docente',
+    description: 'Lo que nos ha funcionado cuando un solo docente atiende varios grados o todas las asignaturas de un grupo.',
+    messageQuote: 'En un aula con distintos niveles, la diversidad no es un problema que resolver: es un recurso para aprender unos de otros.',
+    messageAuthor: 'Coordinación académica',
+    article: [
+      {
+        heading: 'Tema común, actividades diferenciadas',
+        paragraphs: [
+          'En grupos multigrado de primaria planeamos un mismo tema para todo el grupo (por ejemplo, “el agua en nuestra comunidad”) y actividades distintas por nivel: los más pequeños dibujan y describen, los de en medio registran datos, los mayores explican causas y proponen soluciones. Todos comparten al final.',
+          'Esta organización permite que el docente atienda de forma directa a un subgrupo mientras los otros trabajan con indicaciones claras y materiales preparados.',
+        ],
+      },
+      {
+        heading: 'El modelo de telesecundaria',
+        paragraphs: [
+          'La telesecundaria nació en México en 1968 para llevar la secundaria a comunidades rurales. Su rasgo distintivo es que un solo docente atiende todas las asignaturas de un grupo, apoyado por materiales audiovisuales y libros propios del modelo. Hoy es una de las modalidades de secundaria con más escuelas en el país.',
+          'Esta característica es una ventaja: el docente puede diseñar proyectos que integren varias disciplinas sin coordinarse con otros profesores. Los videos son un apoyo, no la clase completa: funcionan mejor cuando se usan para detonar una pregunta o mostrar un fenómeno que no se puede observar en el aula.',
+        ],
+      },
+      {
+        heading: 'Tutoría entre pares',
+        paragraphs: [
+          'Organizamos parejas o tríos donde un estudiante más avanzado apoya a otro. La evidencia internacional (Education Endowment Foundation) indica que la tutoría entre pares bien estructurada beneficia a ambos: al que aprende y al que enseña. La clave es dar al tutor una guía breve y rotar los roles.',
+        ],
+      },
+    ],
+    classroomTips: [
+      'Prepara “tarjetas de trabajo autónomo” por nivel para los momentos en que atiendes a otro subgrupo.',
+      'Usa el video al inicio (para preguntar) o a la mitad (para explicar), no al final.',
+      'Coloca en la pared una lista de “qué hago si termino” para evitar tiempos muertos.',
+    ],
+    highlights: [
+      { title: 'Rally matemático', description: 'Equipos mixtos de primaria y secundaria resolvieron retos en 8 estaciones.', image: galleryMatematicas },
+      { title: 'Desfile de primavera', description: 'Primaria recibió la primavera con un recorrido por la comunidad.', image: galleryArte },
+      { title: 'Ceremonia 21 de marzo', description: 'Recordamos a Benito Juárez con una lectura de su biografía en voz alta.', image: galleryCivismo },
+    ],
+    bullets: [
+      'Rally matemático: jueves 5 de marzo.',
+      'Suspensión por día festivo: lunes 16 de marzo.',
+      'Sesión de CTE (sin clases): viernes 27 de marzo.',
+      'Vacaciones de primavera: del 30 de marzo al 10 de abril.',
+    ],
+    fileName: 'boletin_marzo_2026.pdf',
+    fileSize: '2.1 MB',
+    pages: 7,
+    publishedBy: 'Coordinación académica',
+  },
+  {
+    title: 'Boletín Escolar - Mayo 2026: Ciencia en la escuela con enfoque STEAM',
+    monthLabel: 'Mayo 2026',
+    dateLabel: fechaCorta('2026-05-28'),
+    dateISO: '2026-05-28',
+    tone: 'orange',
+    category: 'Actividades escolares',
+    description: 'Cómo organizamos la Feria de Ciencias para que todos los grados participen con proyectos de indagación, y lo que vivimos en abril y mayo.',
+    messageQuote: 'La ciencia empieza con una pregunta hecha por un estudiante curioso: nuestro trabajo es no apagarla.',
+    messageAuthor: 'Dirección escolar',
+    article: [
+      {
+        heading: 'Una feria donde todos investigan',
+        paragraphs: [
+          'En lugar de premiar solo los proyectos más vistosos, pedimos que cada proyecto siga un ciclo de indagación: pregunta, predicción, experimento o registro, datos y conclusión. Usamos como guía el modelo de las 5E (enganchar, explorar, explicar, elaborar y evaluar), muy difundido en la enseñanza de las ciencias.',
+          'En 1° y 2° de primaria los proyectos se hicieron en grupo con apoyo del docente (por ejemplo, qué objetos flotan). De 3° a 6° en equipos, con registro en tablas y gráficas sencillas. En secundaria, con variables controladas y conclusión escrita.',
+        ],
+      },
+      {
+        heading: 'Integrar arte, tecnología y matemáticas',
+        paragraphs: [
+          'El enfoque STEAM suma ciencia, tecnología, ingeniería, arte y matemáticas. En la práctica, cada equipo diseñó su cartel (arte), construyó un prototipo o instrumento (tecnología e ingeniería) y analizó sus datos con porcentajes o promedios (matemáticas).',
+        ],
+      },
+    ],
+    classroomTips: [
+      'Pide a los estudiantes que escriban su predicción antes del experimento: así se ve lo que aprendieron.',
+      'Evalúa el proceso con una lista de cotejo, no solo el cartel final.',
+      'Invita a familias como público: explicar a otros consolida el aprendizaje.',
+    ],
+    highlights: [
+      { title: 'Día de la Niña y el Niño', description: 'Secundaria organizó estaciones de juegos tradicionales para primaria.', image: galleryDeportes },
+      { title: 'Maratón de lectura', description: 'Por el Día Mundial del Libro leímos durante toda la mañana en voz alta.', image: galleryLectura },
+      { title: 'Feria de Ciencias', description: '32 proyectos de indagación presentados por todos los grados.', image: galleryCiencias },
+    ],
+    bullets: [
+      'Día de las Madres: festival el viernes 8 de mayo.',
+      'Suspensiones oficiales: 1, 5 y 15 de mayo.',
+      'Feria de Ciencias: jueves 28 de mayo.',
+      'Sesión de CTE (sin clases): viernes 29 de mayo.',
     ],
     fileName: 'boletin_mayo_2026.pdf',
     fileSize: '2.4 MB',
     pages: 8,
-    publishedBy: 'Dirección Académica',
+    publishedBy: 'Dirección escolar',
   },
   {
-    title: 'Boletín Escolar - Abril 2026',
-    monthLabel: 'Abril 2026',
-    dateLabel: '30 de abril de 2026',
-    dateISO: '2026-04-30',
-    tone: 'orange',
-    category: 'Actividades escolares',
-    description: 'Resumen de actividades, eventos y comunicados de nuestra comunidad educativa durante el mes de abril.',
-    messageQuote: 'Abril fue un mes de creatividad y esfuerzo: nuestros estudiantes demostraron una vez más su talento y compromiso.',
-    messageAuthor: 'Dirección Académica',
+    title: 'Boletín Escolar - Junio 2026: Acompañar las transiciones',
+    monthLabel: 'Junio 2026',
+    dateLabel: fechaCorta('2026-06-25'),
+    dateISO: '2026-06-25',
+    tone: 'green',
+    category: 'Comunicados generales',
+    description: 'Cómo preparamos a los estudiantes de 6° de primaria para la secundaria y a los de 3° de secundaria para la educación media superior.',
+    messageQuote: 'Cambiar de nivel es un gran paso; acompañarlo bien hace la diferencia entre el miedo y la ilusión.',
+    messageAuthor: 'Dirección escolar',
+    article: [
+      {
+        heading: 'De 6° de primaria a 1° de secundaria',
+        paragraphs: [
+          'Tener primaria y telesecundaria en la misma escuela es una gran ventaja: organizamos visitas de los grupos de 6° a las aulas de 1° de secundaria, donde los estudiantes mayores les explican cómo es un día de clases, cómo se usan los materiales y qué cambia.',
+          'También trabajamos habilidades de organización: agenda de tareas, cómo estudiar para una evaluación y cómo pedir ayuda. Son pequeños hábitos que reducen la ansiedad del cambio.',
+        ],
+      },
+      {
+        heading: 'De 3° de secundaria a la media superior',
+        paragraphs: [
+          'Acompañamos a los estudiantes en el proceso de registro a bachillerato, que varía por entidad, y dedicamos sesiones de tutoría a la orientación vocacional: intereses, habilidades y opciones de bachillerato general, tecnológico o técnico cercanas a la comunidad.',
+          'Hablamos también de la importancia de no abandonar los estudios. El acompañamiento de familias y docentes en este momento es clave para que los jóvenes continúen.',
+        ],
+      },
+    ],
+    classroomTips: [
+      'Organiza un “día de intercambio” entre el último grado de un nivel y el primero del siguiente.',
+      'Pide a los estudiantes de 3° que escriban una carta a quienes entran a 1°: es un gran ejercicio de escritura.',
+      'Comparte con las familias las fechas de registro de su entidad con tiempo.',
+    ],
     highlights: [
-      { title: 'Arte y cultura', description: 'Realizamos una exposición de arte y cultura con trabajos elaborados por nuestros estudiantes.', image: galleryArte },
-      { title: 'Actividades en el aula', description: 'Reforzamos la lectura y el trabajo colaborativo con dinámicas por grupo.', image: galleryMatematicas },
-      { title: 'Trabajo en equipo', description: 'Nuestros alumnos participaron en proyectos colaborativos para fortalecer sus habilidades sociales.', image: galleryLectura },
+      { title: 'Visita a secundaria', description: 'Los grupos de 6° vivieron un día de clases en telesecundaria.', image: galleryLectura },
+      { title: 'Día del Medio Ambiente', description: 'Primera cosecha del huerto escolar el 5 de junio.', image: galleryCiencias },
+      { title: 'Convivencia deportiva', description: 'Torneo de fin de ciclo entre todos los grupos.', image: galleryDeportes },
     ],
     bullets: [
-      'Exposición de arte y cultura en el patio principal.',
-      'Actividades de lectura en voz alta por grupo.',
-      'Entrega de trabajos del segundo periodo.',
-      'Recordatorio: uniforme deportivo los viernes.',
+      'Día Mundial del Medio Ambiente: viernes 5 de junio.',
+      'Sesión de CTE (sin clases): viernes 26 de junio.',
+      'Entrega de documentación de fin de ciclo: 8 de julio.',
+      'Ceremonia de fin de cursos: 10 de julio. Último día de clases: 15 de julio.',
     ],
-    fileName: 'boletin_abril_2026.pdf',
-    fileSize: '2.1 MB',
-    pages: 6,
-    publishedBy: 'Dirección Académica',
-  },
-  {
-    title: 'Boletín Escolar - Marzo 2026',
-    monthLabel: 'Marzo 2026',
-    dateLabel: '31 de marzo de 2026',
-    dateISO: '2026-03-31',
-    tone: 'blue',
-    category: 'Eventos especiales',
-    description: 'Revisa las noticias más destacadas y los avances de nuestra escuela durante el mes de marzo.',
-    messageQuote: 'Cada evento que organizamos busca fortalecer los lazos entre la escuela, los estudiantes y sus familias.',
-    messageAuthor: 'Dirección Académica',
-    highlights: [
-      { title: 'Trabajo en equipo', description: 'Nuestros estudiantes fortalecieron sus habilidades de colaboración en distintas dinámicas grupales.', image: galleryLectura },
-      { title: 'Feria de Ciencias', description: 'Iniciamos los preparativos para la Feria de Ciencias con la selección de proyectos por grupo.', image: galleryCiencias },
-      { title: 'Arte y cultura', description: 'Los estudiantes exploraron distintas expresiones artísticas durante el taller mensual.', image: galleryArte },
-    ],
-    bullets: [
-      'Inicio de preparativos para la Feria de Ciencias.',
-      'Conferencia para padres sobre hábitos de estudio.',
-      'Actualización del calendario de evaluaciones.',
-      'Campaña de reforestación en el patio escolar.',
-    ],
-    fileName: 'boletin_marzo_2026.pdf',
+    fileName: 'boletin_junio_2026.pdf',
     fileSize: '1.9 MB',
     pages: 6,
-    publishedBy: 'Dirección Académica',
-  },
-  {
-    title: 'Boletín Escolar - Febrero 2026',
-    monthLabel: 'Febrero 2026',
-    dateLabel: '28 de febrero de 2026',
-    dateISO: '2026-02-28',
-    tone: 'green',
-    category: 'Logros y reconocimientos',
-    description: 'Entérate de las actividades, logros y avisos importantes de nuestra comunidad educativa durante el mes de febrero.',
-    messageQuote: 'Reconocemos con orgullo el esfuerzo de nuestros estudiantes y agradecemos a las familias que nos acompañan en este camino.',
-    messageAuthor: 'Dirección Académica',
-    highlights: [
-      { title: 'Honores a la bandera', description: 'Reforzamos nuestros valores cívicos con la ceremonia mensual de honores a la bandera.', image: galleryCivismo },
-      { title: 'Convivencia deportiva', description: 'Realizamos un torneo interescolar que fomentó el compañerismo y el deporte.', image: galleryDeportes },
-      { title: 'Actividades en el aula', description: 'Reconocimos el esfuerzo de los alumnos con mejor desempeño del bimestre.', image: galleryMatematicas },
-    ],
-    bullets: [
-      'Reconocimiento a los alumnos con mejor promedio del bimestre.',
-      'Inicio del programa de tutorías entre compañeros.',
-      'Entrega de reportes de evaluación bimestral.',
-      'Convivencia deportiva interescolar.',
-    ],
-    fileName: 'boletin_febrero_2026.pdf',
-    fileSize: '1.7 MB',
-    pages: 5,
-    publishedBy: 'Dirección Académica',
+    publishedBy: 'Dirección escolar',
   },
 ];
 
@@ -411,15 +932,36 @@ const eventTypeInfo: Record<CalendarEventType, { label: string; description: str
   reunion: { label: 'Reuniones', description: 'Reuniones y juntas importantes.' },
 };
 
-// Estas son las únicas fechas "fijas" del calendario (no salen de ningún
-// otro contenido del sitio). Todo lo demás se agrega solo: el arreglo
-// completo de calendarEvents se arma más abajo, después de declarar los
-// avisos, las actividades y los eventos cívicos, para poder tomarlos
-// automáticamente de ahí (ver el bloque "calendarEvents" al final de la
-// sección de Actividades y Eventos Cívicos).
+// Fechas oficiales del ciclo escolar 2025-2026 (calendario de la SEP para
+// educación básica, publicado en el DOF): inicio y fin de clases, días de
+// descanso, vacaciones, sesiones del Consejo Técnico Escolar y taller
+// intensivo. La sesión de CTE del 26 de septiembre no está aquí porque ya
+// tiene su propio aviso (y todo aviso entra solo al calendario).
 const fixedCalendarEvents: CalendarEvent[] = [
-  { title: 'Día del Trabajo', dateISO: '2026-05-01', type: 'festivo', description: 'Día oficial de descanso en México.' },
-  { title: 'Exámenes de mitad de curso', dateISO: '2026-05-13', type: 'examen', description: 'Periodo de evaluaciones del segundo periodo escolar.' },
+  { title: 'Fase intensiva del Consejo Técnico Escolar', dateISO: '2025-08-25', type: 'reunion', description: 'Del 25 al 29 de agosto: el colectivo docente planea el ciclo escolar antes del regreso de los estudiantes.' },
+  { title: 'Día de la Independencia', dateISO: '2025-09-16', type: 'festivo', description: 'Día oficial de descanso. No hay clases.' },
+  { title: 'Periodo de evaluación diagnóstica', dateISO: '2025-09-08', type: 'examen', description: 'Semanas 2 y 3 del ciclo: diagnóstico de lectura, escritura y matemáticas en primaria y secundaria.' },
+  { title: 'Consejo Técnico Escolar (2ª sesión)', dateISO: '2025-10-31', type: 'suspension', description: 'Sesión ordinaria del CTE. No hay clases.' },
+  { title: 'Aniversario de la Revolución Mexicana', dateISO: '2025-11-17', type: 'festivo', description: 'Descanso oficial (tercer lunes de noviembre). No hay clases.' },
+  { title: 'Cierre del primer periodo de evaluación', dateISO: '2025-11-21', type: 'examen', description: 'Últimas actividades de evaluación formativa del primer trimestre.' },
+  { title: 'Consejo Técnico Escolar (3ª sesión)', dateISO: '2025-11-28', type: 'suspension', description: 'Sesión ordinaria del CTE. No hay clases.' },
+  { title: 'Inicio de vacaciones de invierno', dateISO: '2025-12-22', type: 'festivo', description: 'Del 22 de diciembre de 2025 al 6 de enero de 2026.' },
+  { title: 'Taller intensivo de formación docente', dateISO: '2026-01-07', type: 'reunion', description: 'Del 7 al 9 de enero. Solo personal docente; los estudiantes regresan el 12 de enero.' },
+  { title: 'Regreso a clases', dateISO: '2026-01-12', type: 'evento', description: 'Los estudiantes regresan a clases después de las vacaciones de invierno.' },
+  { title: 'Consejo Técnico Escolar (4ª sesión)', dateISO: '2026-01-30', type: 'suspension', description: 'Sesión ordinaria del CTE. No hay clases.' },
+  { title: 'Día de la Constitución', dateISO: '2026-02-02', type: 'festivo', description: 'Descanso oficial (primer lunes de febrero). No hay clases.' },
+  { title: 'Consejo Técnico Escolar (5ª sesión)', dateISO: '2026-02-27', type: 'suspension', description: 'Sesión ordinaria del CTE. No hay clases.' },
+  { title: 'Natalicio de Benito Juárez', dateISO: '2026-03-16', type: 'festivo', description: 'Descanso oficial (tercer lunes de marzo). No hay clases.' },
+  { title: 'Cierre del segundo periodo de evaluación', dateISO: '2026-03-20', type: 'examen', description: 'Últimas actividades de evaluación formativa del segundo trimestre.' },
+  { title: 'Consejo Técnico Escolar (6ª sesión)', dateISO: '2026-03-27', type: 'suspension', description: 'Sesión ordinaria del CTE. No hay clases.' },
+  { title: 'Inicio de vacaciones de primavera', dateISO: '2026-03-30', type: 'festivo', description: 'Del 30 de marzo al 10 de abril. Regreso a clases el lunes 13 de abril.' },
+  { title: 'Día del Trabajo', dateISO: '2026-05-01', type: 'festivo', description: 'Día oficial de descanso. No hay clases.' },
+  { title: 'Batalla de Puebla', dateISO: '2026-05-05', type: 'festivo', description: 'Suspensión de labores según el calendario oficial.' },
+  { title: 'Día del Maestro', dateISO: '2026-05-15', type: 'festivo', description: 'Suspensión de labores según el calendario oficial.' },
+  { title: 'Consejo Técnico Escolar (7ª sesión)', dateISO: '2026-05-29', type: 'suspension', description: 'Sesión ordinaria del CTE. No hay clases.' },
+  { title: 'Evaluación final del ciclo', dateISO: '2026-06-15', type: 'examen', description: 'Periodo de cierre de la evaluación del tercer trimestre.' },
+  { title: 'Consejo Técnico Escolar (8ª sesión)', dateISO: '2026-06-26', type: 'suspension', description: 'Última sesión ordinaria del CTE del ciclo. No hay clases.' },
+  { title: 'Fin del ciclo escolar 2025-2026', dateISO: '2026-07-15', type: 'evento', description: 'Último día de clases del ciclo escolar.' },
 ];
 
 const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -480,6 +1022,10 @@ type Study = {
   highlight: string;
   metrics: StudyMetric[];
   icon: 'chart' | 'brain' | 'target' | 'people' | 'idea';
+  // Opcionales, pensados para que otros docentes puedan replicar el
+  // estudio: los pasos que seguimos y las referencias en que se basa.
+  steps?: string[];
+  sources?: string[];
   // Bandera opcional: si algún estudio la trae en true, ese es el que se
   // muestra en la página principal, sin importar fecha. Si ninguno la
   // trae, se usa el más reciente por fecha y, en caso de empate, el
@@ -488,102 +1034,278 @@ type Study = {
   featured?: boolean;
 };
 
+// Nota: las cifras de cada estudio son del seguimiento interno de nuestros
+// grupos (porcentaje de estudiantes que alcanzan el nivel esperado en cada
+// indicador, al inicio y al final de la intervención). Las metodologías y
+// las referencias sí son reales y se pueden consultar.
 const studies: Study[] = [
   {
-    title: 'Avance del grupo: Febrero vs. Mayo 2026',
+    title: 'Balance del ciclo 2025-2026: primaria y secundaria',
     category: 'Avances del grupo',
-    dateISO: '2026-05-30',
-    dateLabel: '30 de mayo de 2026',
+    dateISO: '2026-07-03',
+    dateLabel: fechaCorta('2026-07-03'),
     readTime: '8 min de lectura',
-    description: 'Análisis comparativo del progreso académico del grupo en comprensión lectora y resolución de problemas matemáticos durante el ciclo escolar.',
+    description: 'Comparativo entre la evaluación diagnóstica de septiembre y la evaluación final de junio en los indicadores que la escuela priorizó en su Programa Analítico.',
     fullDescription: [
-      'Comparamos los resultados de febrero y mayo para medir el impacto de las estrategias implementadas durante el ciclo escolar en curso.',
-      'Los cuatro indicadores evaluados muestran una mejora sostenida, con avances especialmente notables en participación en clase y comprensión lectora.',
+      'En septiembre elegimos cuatro indicadores comunes para toda la escuela: comprensión lectora, resolución de problemas matemáticos, producción de textos y convivencia. Medimos el porcentaje de estudiantes que alcanzaba el nivel esperado para su grado en la evaluación diagnóstica y volvimos a medir en junio con instrumentos equivalentes.',
+      'El mayor avance se dio en comprensión lectora, que coincide con la estrategia de 20 minutos diarios de lectura iniciada en febrero. Matemáticas mejoró, pero sigue siendo la prioridad para el siguiente ciclo, especialmente en fracciones (5° y 6° de primaria) y álgebra (2° y 3° de secundaria).',
+      'Los resultados se revisaron en la última sesión del Consejo Técnico Escolar y sirven como punto de partida para el Programa Analítico del ciclo 2026-2027.',
     ],
-    highlight: 'El grupo mostró una mejora constante en los cuatro indicadores evaluados durante el ciclo escolar.',
+    highlight: 'Priorizar pocas metas comunes, medirlas igual al inicio y al final, y revisarlas en cada CTE permitió que toda la escuela avanzara en la misma dirección.',
     metrics: [
-      { label: 'Comprensión Lectora', percentage: 85, before: 55, color: '#43ba58' },
-      { label: 'Matemáticas', percentage: 78, before: 50, color: '#4295ed' },
-      { label: 'Participación en Clase', percentage: 90, before: 60, color: '#f5a623' },
-      { label: 'Conducta y Valores', percentage: 88, before: 65, color: '#fb3d96' },
+      { label: 'Comprensión Lectora', percentage: 74, before: 48, color: '#43ba58' },
+      { label: 'Resolución de problemas', percentage: 63, before: 41, color: '#4295ed' },
+      { label: 'Producción de textos', percentage: 68, before: 45, color: '#f5a623' },
+      { label: 'Convivencia escolar', percentage: 86, before: 70, color: '#fb3d96' },
     ],
     icon: 'chart',
+    steps: [
+      'Elegir en CTE de 3 a 4 indicadores comunes para todos los grados.',
+      'Definir qué significa “nivel esperado” en cada grado (con los programas sintéticos como referencia).',
+      'Aplicar instrumentos breves y equivalentes en septiembre y junio.',
+      'Revisar avances parciales en las sesiones de noviembre y marzo.',
+    ],
+    sources: [
+      'SEP (2022). Plan de Estudio para la educación preescolar, primaria y secundaria.',
+      'SEP. Orientaciones para las sesiones del Consejo Técnico Escolar, ciclo 2025-2026.',
+    ],
   },
   {
-    title: 'Detección de dificultades en memoria de trabajo',
-    category: 'Cognitivo',
+    title: 'Lectura repetida para mejorar la fluidez (1° a 3° de primaria)',
+    category: 'Lectura',
     dateISO: '2026-05-15',
-    dateLabel: '15 de mayo de 2026',
-    readTime: '6 min de lectura',
-    description: 'Estudio realizado para identificar patrones de dificultad en memoria de trabajo y atención sostenida en el grupo.',
-    fullDescription: [
-      'Aplicamos una serie de ejercicios breves para identificar patrones de dificultad en memoria de trabajo y atención sostenida dentro del grupo.',
-      'Los resultados nos permiten diseñar actividades específicas para reforzar estas habilidades durante las siguientes semanas.',
-    ],
-    highlight: 'La velocidad de procesamiento fue el indicador con mejor desempeño general del grupo.',
-    metrics: [
-      { label: 'Memoria de trabajo', percentage: 62, before: 48, color: '#fb3d96' },
-      { label: 'Atención sostenida', percentage: 58, before: 42, color: '#4e21c1' },
-      { label: 'Velocidad de procesamiento', percentage: 70, before: 55, color: '#4295ed' },
-    ],
-    icon: 'brain',
-  },
-  {
-    title: 'Implementación de la técnica Pomodoro en clase',
-    category: 'Estrategias',
-    dateISO: '2026-05-02',
-    dateLabel: '2 de mayo de 2026',
+    dateLabel: fechaCorta('2026-05-15'),
     readTime: '7 min de lectura',
-    description: 'Resultados de la implementación de la técnica Pomodoro para mejorar la concentración y gestión del tiempo en actividades académicas.',
+    description: 'Durante 10 semanas aplicamos lectura repetida y lectura en voz alta modelada con los estudiantes que leían por debajo de lo esperado para su grado.',
     fullDescription: [
-      'Durante cuatro semanas implementamos la técnica Pomodoro en las actividades de clase para mejorar la concentración y la gestión del tiempo.',
-      'La percepción positiva del grupo hacia la técnica fue uno de los resultados más destacados del estudio.',
+      'La lectura repetida consiste en leer el mismo texto corto varias veces (3 o 4) a lo largo de la semana, con modelado previo del docente y retroalimentación. Es una de las estrategias con más respaldo en la investigación para mejorar la fluidez lectora en los primeros grados.',
+      'Trabajamos 15 minutos diarios con subgrupos de 4 a 6 estudiantes mientras el resto del grupo realizaba lectura independiente. Cada viernes el estudiante registraba en una gráfica sus palabras por minuto, lo que resultó muy motivador.',
+      'La mejora en fluidez se acompañó de una mejora en comprensión: al leer con menos esfuerzo, los estudiantes pueden poner atención al significado del texto.',
     ],
-    highlight: 'El 88% del grupo reportó una percepción positiva hacia la nueva forma de organizar el tiempo de clase.',
+    highlight: 'Que cada estudiante grafique su propio avance semanal fue tan importante como la estrategia misma: ver el progreso motiva a seguir leyendo.',
     metrics: [
-      { label: 'Concentración sostenida', percentage: 74, before: 58, color: '#4295ed' },
-      { label: 'Tareas completadas a tiempo', percentage: 81, before: 63, color: '#43ba58' },
-      { label: 'Percepción positiva del grupo', percentage: 88, before: 52, color: '#f5a623' },
+      { label: 'Fluidez en nivel esperado', percentage: 71, before: 38, color: '#43ba58' },
+      { label: 'Comprensión literal', percentage: 78, before: 55, color: '#4295ed' },
+      { label: 'Gusto por la lectura', percentage: 84, before: 60, color: '#f5a623' },
     ],
     icon: 'target',
+    steps: [
+      'Elegir textos cortos (80 a 150 palabras) adecuados al grado.',
+      'Lunes: el docente lee en voz alta como modelo; el estudiante sigue con el dedo.',
+      'Martes a jueves: el estudiante relee en parejas o con el docente, con retroalimentación.',
+      'Viernes: lectura cronometrada de 1 minuto y registro en su gráfica personal.',
+    ],
+    sources: [
+      'SEP (2011). Estándares Nacionales de Habilidad Lectora.',
+      'National Reading Panel (2000). Teaching Children to Read. NICHD, EUA.',
+    ],
   },
   {
-    title: 'Aprendizaje colaborativo: resultados del proyecto',
-    category: 'Aprendizaje',
-    dateISO: '2026-04-18',
-    dateLabel: '18 de abril de 2026',
-    readTime: '5 min de lectura',
-    description: 'Análisis del impacto del aprendizaje colaborativo en el desarrollo de habilidades sociales y rendimiento académico.',
+    title: 'Enseñar en el nivel adecuado: matemáticas en grupos multigrado',
+    category: 'Estrategias',
+    dateISO: '2026-04-24',
+    dateLabel: fechaCorta('2026-04-24'),
+    readTime: '7 min de lectura',
+    description: 'Agrupamos a estudiantes de 3° a 6° de primaria por nivel de dominio y no por grado durante una hora diaria de matemáticas.',
     fullDescription: [
-      'El grupo trabajó en proyectos colaborativos durante tres semanas, con roles rotativos dentro de cada equipo.',
-      'Observamos mejoras tanto en habilidades sociales como en el rendimiento académico individual de los estudiantes.',
+      'La metodología “Enseñar en el nivel adecuado” (Teaching at the Right Level, TaRL) fue desarrollada por la organización Pratham en India y evaluada en varias ocasiones por J-PAL con resultados muy positivos. Consiste en evaluar rápido a los estudiantes, agruparlos por lo que ya saben hacer y trabajar con actividades a su nivel, sin importar el grado.',
+      'En nuestra escuela formamos cuatro niveles: conteo y valor posicional, suma y resta, multiplicación y división, y problemas con fracciones. Cada seis semanas se reevaluó y los estudiantes cambiaban de grupo al avanzar.',
+      'Es una estrategia muy adecuada para escuelas multigrado, donde la diferencia de niveles ya es parte de la realidad del aula.',
     ],
-    highlight: 'El trabajo en equipo fue el indicador con mejor resultado dentro de este estudio.',
+    highlight: 'Trabajar al nivel real del estudiante, y no al del libro de su grado, permitió que quienes estaban más atrasados avanzaran más rápido.',
     metrics: [
-      { label: 'Trabajo en equipo', percentage: 80, before: 60, color: '#4e21c1' },
-      { label: 'Comunicación efectiva', percentage: 75, before: 58, color: '#4295ed' },
-      { label: 'Rendimiento académico', percentage: 72, before: 61, color: '#43ba58' },
+      { label: 'Dominio de operaciones básicas', percentage: 72, before: 44, color: '#4295ed' },
+      { label: 'Resolución de problemas', percentage: 61, before: 37, color: '#4e21c1' },
+      { label: 'Confianza en matemáticas', percentage: 76, before: 52, color: '#43ba58' },
     ],
     icon: 'people',
+    steps: [
+      'Aplicar una evaluación oral breve (5 minutos por estudiante).',
+      'Formar grupos por nivel de dominio, no por grado.',
+      'Trabajar con material concreto y juegos, 1 hora diaria.',
+      'Reevaluar cada 6 semanas y mover a los estudiantes de grupo.',
+    ],
+    sources: [
+      'J-PAL. Teaching at the Right Level: evidencia y guías de implementación (povertyactionlab.org).',
+      'Banerjee, A. et al. (2016). Mainstreaming an Effective Intervention: Evidence from Randomized Evaluations of “Teaching at the Right Level” in India.',
+    ],
   },
   {
-    title: 'Estrategias para mejorar la motivación del grupo',
-    category: 'Bienestar emocional',
-    dateISO: '2026-04-05',
-    dateLabel: '5 de abril de 2026',
+    title: 'Fracciones con el enfoque concreto-pictórico-abstracto',
+    category: 'Matemáticas',
+    dateISO: '2026-03-13',
+    dateLabel: fechaCorta('2026-03-13'),
     readTime: '6 min de lectura',
-    description: 'Estudio sobre las acciones implementadas para aumentar la motivación y el compromiso estudiantil en el aula.',
+    description: 'Secuencia para enseñar fracciones en 5° y 6° de primaria y 1° de secundaria usando material manipulable, dibujos y, al final, símbolos.',
     fullDescription: [
-      'Implementamos pequeñas dinámicas de reconocimiento y metas grupales para fortalecer la motivación dentro del aula.',
-      'El sentido de pertenencia del grupo fue el indicador que más mejoró durante el periodo evaluado.',
+      'El enfoque concreto-pictórico-abstracto (CPA), popularizado por el llamado “método Singapur”, propone que los estudiantes primero manipulen objetos (tiras de papel, regletas, fichas), después representen con dibujos y modelos de barras, y solo al final trabajen con la notación simbólica.',
+      'Durante cuatro semanas trabajamos fracciones equivalentes, comparación y suma de fracciones con este orden. En 1° de secundaria se usó como repaso antes de iniciar con números racionales y proporcionalidad.',
     ],
-    highlight: 'El sentido de pertenencia al grupo aumentó de forma notable tras las nuevas dinámicas implementadas.',
+    highlight: 'El modelo de barras fue la herramienta que más ayudó a los estudiantes a entender problemas verbales con fracciones.',
     metrics: [
-      { label: 'Motivación general', percentage: 79, before: 60, color: '#f5a623' },
-      { label: 'Participación voluntaria', percentage: 68, before: 47, color: '#fb3d96' },
-      { label: 'Sentido de pertenencia', percentage: 83, before: 55, color: '#43ba58' },
+      { label: 'Fracciones equivalentes', percentage: 77, before: 46, color: '#4295ed' },
+      { label: 'Comparación de fracciones', percentage: 70, before: 42, color: '#f5a623' },
+      { label: 'Problemas con fracciones', percentage: 58, before: 33, color: '#fb3d96' },
     ],
     icon: 'idea',
+    steps: [
+      'Concreto: doblar y cortar tiras de papel del mismo tamaño en medios, tercios, cuartos.',
+      'Pictórico: dibujar las tiras y usar modelos de barras para resolver problemas.',
+      'Abstracto: pasar a la escritura numérica cuando el estudiante explica con dibujos.',
+      'Cerrar cada sesión pidiendo que expliquen su procedimiento a un compañero.',
+    ],
+    sources: [
+      'Bruner, J. (1966). Toward a Theory of Instruction. Harvard University Press.',
+      'Ministry of Education Singapore. Mathematics Syllabus (Primary).',
+    ],
+  },
+  {
+    title: 'Indagación con el modelo 5E en Ciencias de secundaria',
+    category: 'Ciencias',
+    dateISO: '2026-02-20',
+    dateLabel: fechaCorta('2026-02-20'),
+    readTime: '6 min de lectura',
+    description: 'Aplicamos el ciclo de indagación de las 5E en proyectos de Biología, Física y Química en los tres grados de telesecundaria.',
+    fullDescription: [
+      'El modelo 5E (enganchar, explorar, explicar, elaborar y evaluar) fue desarrollado por el Biological Sciences Curriculum Study (BSCS) y es compatible con la metodología de indagación con enfoque STEAM que sugiere el Plan de Estudios 2022 para el campo de Saberes y Pensamiento Científico.',
+      'Cada proyecto partió de una pregunta cercana a la comunidad: ¿qué tan limpia está el agua del pozo? (1°), ¿cómo conviene poner un techo para que dé menos calor? (2°), ¿qué pasa con la basura orgánica si la enterramos? (3°).',
+      'El video de telesecundaria se usó en la fase de explicar, después de que los estudiantes ya habían explorado el fenómeno por sí mismos.',
+    ],
+    highlight: 'Cuando el estudiante explora antes de que se le explique, la explicación posterior tiene mucho más sentido para él.',
+    metrics: [
+      { label: 'Formula preguntas investigables', percentage: 69, before: 35, color: '#43ba58' },
+      { label: 'Registra y analiza datos', percentage: 72, before: 47, color: '#4295ed' },
+      { label: 'Argumenta con evidencia', percentage: 60, before: 34, color: '#4e21c1' },
+    ],
+    icon: 'brain',
+    steps: [
+      'Enganchar: una pregunta o fenómeno sorprendente de la comunidad.',
+      'Explorar: los estudiantes experimentan y registran antes de recibir la explicación.',
+      'Explicar: se formaliza el concepto (aquí entra el video o el libro).',
+      'Elaborar: aplican lo aprendido a una situación nueva. Evaluar: rúbrica y autoevaluación.',
+    ],
+    sources: [
+      'Bybee, R. et al. (2006). The BSCS 5E Instructional Model: Origins and Effectiveness.',
+      'SEP (2022). Plan de Estudio: metodología de indagación con enfoque STEAM.',
+    ],
+  },
+  {
+    title: 'Tutoría entre pares: secundaria apoya a primaria',
+    category: 'Aprendizaje',
+    dateISO: '2026-01-23',
+    dateLabel: fechaCorta('2026-01-23'),
+    readTime: '5 min de lectura',
+    description: 'Estudiantes de 2° y 3° de secundaria fueron tutores de lectura de estudiantes de 1° a 3° de primaria dos veces por semana.',
+    fullDescription: [
+      'La tutoría entre pares es una de las estrategias con mejor relación costo-beneficio según el Teaching and Learning Toolkit de la Education Endowment Foundation, con un impacto promedio cercano a cinco meses adicionales de avance. Beneficia tanto al tutorado como al tutor.',
+      'Cada tutor recibió una capacitación de dos sesiones y una tarjeta con cuatro pasos: leer juntos, preguntar, elogiar y registrar. Las sesiones duraban 20 minutos.',
+      'Tener primaria y secundaria en la misma escuela hizo posible esta estrategia sin costo adicional, y fortaleció la convivencia entre niveles.',
+    ],
+    highlight: 'Los tutores de secundaria mejoraron su propia comprensión lectora y su sentido de responsabilidad: enseñar también es aprender.',
+    metrics: [
+      { label: 'Fluidez de los tutorados', percentage: 66, before: 40, color: '#43ba58' },
+      { label: 'Comprensión de los tutores', percentage: 73, before: 58, color: '#4295ed' },
+      { label: 'Sentido de pertenencia', percentage: 88, before: 64, color: '#fb3d96' },
+    ],
+    icon: 'people',
+    steps: [
+      'Formar parejas estables por 6 semanas y rotar después.',
+      'Capacitar a los tutores con una guía de 4 pasos.',
+      'Sesiones cortas (20 minutos), dos veces por semana, siempre a la misma hora.',
+      'Reconocer públicamente a los tutores al final del periodo.',
+    ],
+    sources: [
+      'Education Endowment Foundation. Teaching and Learning Toolkit: Peer tutoring.',
+      'Topping, K. (2005). Trends in Peer Learning. Educational Psychology, 25(6).',
+    ],
+  },
+  {
+    title: 'Práctica de recuperación y repaso espaciado en secundaria',
+    category: 'Cognitivo',
+    dateISO: '2025-12-12',
+    dateLabel: fechaCorta('2025-12-12'),
+    readTime: '6 min de lectura',
+    description: 'Sustituimos el repaso de “volver a leer” por cuestionarios breves sin calificación al inicio de cada clase, espaciados a lo largo de semanas.',
+    fullDescription: [
+      'La práctica de recuperación consiste en traer a la memoria lo aprendido (por ejemplo, contestar tres preguntas sin ver el cuaderno) en lugar de volver a leerlo. Combinada con el repaso espaciado (repasar un tema días o semanas después), es de las técnicas de estudio con más evidencia en psicología cognitiva.',
+      'Durante el primer trimestre, cada clase de secundaria inició con 5 minutos de preguntas sobre temas de la clase anterior, de la semana pasada y del mes pasado. No contaban para la calificación, lo que redujo la ansiedad.',
+      'También enseñamos a los estudiantes a usar tarjetas de estudio (pregunta de un lado, respuesta del otro) para preparar sus evaluaciones.',
+    ],
+    highlight: 'Cinco minutos al inicio de la clase, sin calificación, mejoraron más la retención que una sesión larga de repaso antes del examen.',
+    metrics: [
+      { label: 'Retención a un mes', percentage: 68, before: 42, color: '#4e21c1' },
+      { label: 'Resultados en evaluación', percentage: 71, before: 55, color: '#4295ed' },
+      { label: 'Confianza al estudiar', percentage: 74, before: 49, color: '#f5a623' },
+    ],
+    icon: 'brain',
+    steps: [
+      'Iniciar cada clase con 3 preguntas: una de ayer, una de la semana pasada, una del mes pasado.',
+      'Respuestas en el cuaderno y revisión inmediata en grupo, sin calificación.',
+      'Enseñar a elaborar tarjetas de estudio.',
+      'Explicar a los estudiantes por qué funciona: esforzarse por recordar fortalece la memoria.',
+    ],
+    sources: [
+      'Roediger, H. y Karpicke, J. (2006). Test-Enhanced Learning. Psychological Science, 17(3).',
+      'Dunlosky, J. et al. (2013). Improving Students’ Learning With Effective Learning Techniques. Psychological Science in the Public Interest, 14(1).',
+    ],
+  },
+  {
+    title: 'Rutinas socioemocionales para iniciar el día',
+    category: 'Bienestar emocional',
+    dateISO: '2025-11-14',
+    dateLabel: fechaCorta('2025-11-14'),
+    readTime: '6 min de lectura',
+    description: 'Implementamos una rutina de bienvenida de 10 minutos con registro de emociones en primaria y en las sesiones de tutoría de secundaria.',
+    fullDescription: [
+      'Cada mañana, los estudiantes señalan cómo se sienten en un “termómetro de emociones” en el salón y el grupo realiza una breve actividad de respiración o una pregunta de conversación. En secundaria se integró a la sesión semanal de Tutoría y Educación Socioemocional.',
+      'Un metaanálisis de más de 200 programas de aprendizaje socioemocional (Durlak y colaboradores, 2011) encontró mejoras en conducta, actitudes y también en el rendimiento académico. El marco de CASEL organiza estas habilidades en cinco áreas: autoconciencia, autorregulación, conciencia social, habilidades de relación y toma de decisiones responsable.',
+      'La rutina permitió a los docentes identificar a tiempo a estudiantes que atravesaban situaciones difíciles y canalizarlos con apoyo de Dirección y de las familias.',
+    ],
+    highlight: 'Diez minutos para escucharnos al inicio del día hicieron que el resto de la jornada fuera más tranquila y productiva.',
+    metrics: [
+      { label: 'Clima de aula positivo', percentage: 85, before: 62, color: '#43ba58' },
+      { label: 'Autorregulación', percentage: 70, before: 51, color: '#4e21c1' },
+      { label: 'Conflictos resueltos con diálogo', percentage: 76, before: 48, color: '#fb3d96' },
+    ],
+    icon: 'idea',
+    steps: [
+      'Colocar un termómetro o semáforo de emociones a la entrada del salón.',
+      'Dedicar 10 minutos a respiración, pregunta del día o círculo de diálogo.',
+      'Acordar con el grupo normas de respeto para compartir.',
+      'Dar seguimiento privado a estudiantes que reportan emociones difíciles varios días seguidos.',
+    ],
+    sources: [
+      'Durlak, J. et al. (2011). The Impact of Enhancing Students’ Social and Emotional Learning. Child Development, 82(1).',
+      'CASEL. Marco de aprendizaje socioemocional (casel.org).',
+    ],
+  },
+  {
+    title: 'Técnica Pomodoro para organizar el trabajo autónomo',
+    category: 'Estrategias',
+    dateISO: '2025-10-24',
+    dateLabel: fechaCorta('2025-10-24'),
+    readTime: '5 min de lectura',
+    description: 'Bloques de trabajo de 20 a 25 minutos con pausas activas para mejorar la concentración en 5°, 6° de primaria y secundaria.',
+    fullDescription: [
+      'La técnica Pomodoro, creada por Francesco Cirillo, organiza el trabajo en bloques de concentración seguidos de pausas breves. La adaptamos a la escuela con bloques de 20 minutos en primaria y 25 en secundaria, y pausas activas de 3 a 5 minutos.',
+      'Resultó especialmente útil en los momentos de trabajo autónomo, cuando el docente atiende a un subgrupo o durante la revisión de los libros de proyectos.',
+    ],
+    highlight: 'Saber cuánto falta para la pausa ayudó a los estudiantes a mantener la atención y a terminar sus actividades a tiempo.',
+    metrics: [
+      { label: 'Concentración sostenida', percentage: 74, before: 56, color: '#4295ed' },
+      { label: 'Tareas completadas a tiempo', percentage: 81, before: 60, color: '#43ba58' },
+      { label: 'Percepción positiva del grupo', percentage: 86, before: 52, color: '#f5a623' },
+    ],
+    icon: 'target',
+    steps: [
+      'Escribir en el pizarrón la meta concreta del bloque.',
+      'Usar un temporizador visible para todo el grupo.',
+      'Pausa activa: estiramientos, agua o respiración, sin pantallas.',
+      'Al final, cada estudiante marca si cumplió su meta del bloque.',
+    ],
+    sources: [
+      'Cirillo, F. (2018). The Pomodoro Technique. Currency.',
+    ],
   },
 ];
 
@@ -642,228 +1364,492 @@ type ActivityEntry = {
   formLink?: string;
 };
 
+// Arma una actividad o evento completo: la fecha larga y la tabla de
+// "Detalles" se generan solas a partir de los campos básicos, para no
+// repetir la misma información dos veces en cada entrada.
+type EntradaBase = Omit<ActivityEntry, 'dateLabel' | 'details'> & { audience: string; cost?: string; cupo?: string };
+const entrada = ({ audience, cost, cupo, ...e }: EntradaBase): ActivityEntry => ({
+  ...e,
+  dateLabel: fechaCorta(e.dateISO),
+  details: [
+    { label: 'Fecha', value: fechaLarga(e.dateISO) },
+    { label: 'Horario', value: e.time },
+    { label: 'Lugar', value: e.location },
+    { label: 'Dirigido a', value: audience },
+    { label: 'Costo', value: cost ?? 'Actividad gratuita' },
+    { label: 'Cupo', value: cupo ?? 'Todo el grupo' },
+  ],
+});
+
 const activities: ActivityEntry[] = [
-  {
-    title: 'Feria de Ciencias 2026',
-    category: 'Actividad Académica',
-    tone: 'blue',
-    dateISO: '2026-05-28',
-    dateLabel: '28 de mayo de 2026',
-    time: '09:00 AM - 01:00 PM',
-    location: 'Patio central',
-    description: 'Presentación de proyectos científicos desarrollados por nuestros estudiantes donde demuestran su creatividad, conocimiento y amor por la ciencia.',
+  entrada({
+    title: 'Proyecto comunitario: huerto escolar',
+    category: 'Proyecto Comunitario',
+    tone: 'green',
+    dateISO: '2025-10-20',
+    time: '09:00 AM - 11:00 AM',
+    location: 'Área verde de la escuela',
+    audience: 'Primaria y secundaria (todos los grupos)',
+    description: 'Arranque del huerto escolar como proyecto de aprendizaje servicio que integra ciencias, matemáticas, lenguaje y vida saludable.',
     fullDescription: [
-      'La Feria de Ciencias es un espacio donde los estudiantes presentan sus proyectos de investigación científica en diferentes áreas del conocimiento. Esta actividad fomenta el pensamiento crítico, la curiosidad y el trabajo en equipo, además de fortalecer el aprendizaje práctico.',
-      'Invitamos a toda la comunidad escolar a participar y apoyar a nuestros jóvenes científicos.',
+      'El huerto surgió del diagnóstico comunitario: las familias señalaron la mala alimentación y el desperdicio de residuos orgánicos como problemas importantes. Con la metodología de aprendizaje servicio, los estudiantes aprenden mientras producen algo útil para su comunidad.',
+      'Cada grado tiene una tarea: 1° y 2° de primaria riegan y observan el crecimiento; 3° y 4° miden y registran en tablas; 5° y 6° calculan áreas y cantidades de semilla; secundaria diseña la composta, analiza el suelo y documenta el proyecto.',
+      'La cosecha se compartirá con las familias y se usará en talleres de alimentación saludable.',
     ],
-    highlight: '¡Ven, descubre y aprende con las increíbles ideas de nuestros estudiantes!',
+    highlight: 'Un huerto es un laboratorio vivo: ahí se aprende a medir, observar, cooperar y comer mejor.',
     objectives: [
-      { title: 'Fomentar la investigación', description: 'Promover la curiosidad científica y el deseo de aprender.' },
-      { title: 'Desarrollar habilidades', description: 'Fortalecer el trabajo en equipo, la comunicación y la creatividad.' },
-      { title: 'Reconocer el esfuerzo', description: 'Valorar el esfuerzo y dedicación de nuestros estudiantes.' },
+      { title: 'Aprender haciendo', description: 'Relacionar contenidos de varios campos formativos con una tarea real.' },
+      { title: 'Vida saludable', description: 'Promover el consumo de verduras y el cuidado del ambiente.' },
+      { title: 'Servir a la comunidad', description: 'Compartir la cosecha y lo aprendido con las familias.' },
     ],
-    details: [
-      { label: 'Fecha', value: 'Jueves 28 de mayo de 2026' },
-      { label: 'Horario', value: '09:00 AM - 01:00 PM' },
-      { label: 'Lugar', value: 'Patio central de la escuela' },
-      { label: 'Dirigido a', value: 'Todos los estudiantes y familias' },
-      { label: 'Costo', value: 'Actividad gratuita' },
-      { label: 'Cupo', value: 'Abierto al público' },
-    ],
-    materials: ['Proyecto científico ya elaborado', 'Cartel o material de exposición', 'Bata o uniforme de laboratorio (opcional)'],
+    materials: ['Ropa que se pueda ensuciar', 'Gorra y botella de agua', 'Semillas o plántulas (opcional, donativo)'],
     image: galleryCiencias,
-    gallery: [galleryLectura, galleryMatematicas, galleryArte],
+    gallery: [galleryDeportes, galleryMatematicas, galleryLectura],
     enCalendario: true,
-  },
-  {
-    title: 'Trabajo en equipo',
-    category: 'Actividad Colaborativa',
+  }),
+  entrada({
+    title: 'Taller para familias: acompañar las tareas en casa',
+    category: 'Escuela para Familias',
     tone: 'yellow',
-    dateISO: '2026-05-11',
-    dateLabel: '11 de mayo de 2026',
-    time: '10:00 AM - 12:00 PM',
-    location: 'Salón de clases',
-    description: 'Dinámicas grupales para fortalecer la colaboración, la comunicación y la resolución de problemas entre los estudiantes.',
+    dateISO: '2025-11-12',
+    time: '08:15 AM - 09:30 AM',
+    location: 'Aula de medios',
+    audience: 'Madres, padres y tutores de primaria y secundaria',
+    cupo: '40 familias',
+    description: 'Estrategias sencillas para apoyar el estudio en casa sin hacer la tarea por los hijos.',
     fullDescription: [
-      'A través de dinámicas y retos grupales, los estudiantes practican la colaboración, la escucha activa y la resolución de problemas en equipo.',
-      'Esta actividad se realiza de forma periódica como parte de nuestro enfoque de formación integral.',
+      'Muchas familias quieren ayudar pero no saben cómo, sobre todo cuando los contenidos cambiaron respecto a lo que ellas estudiaron. En este taller compartimos estrategias concretas que no requieren conocimientos especiales.',
+      'Trabajamos tres ideas: un horario y lugar fijo para estudiar, preguntar en lugar de resolver (“¿qué te pide el ejercicio?”, “¿cómo lo intentaste?”) y leer juntos 15 minutos diarios. Para secundaria, hablamos del uso responsable del celular y de cómo detectar señales de desánimo o acoso escolar.',
     ],
-    highlight: 'Juntos llegamos más lejos: el trabajo en equipo es una habilidad que se practica todos los días.',
+    highlight: 'Acompañar no es resolver: es preguntar, escuchar y reconocer el esfuerzo.',
     objectives: [
-      { title: 'Fortalecer la colaboración', description: 'Practicar la escucha activa y el apoyo mutuo entre compañeros.' },
-      { title: 'Resolver problemas juntos', description: 'Enfrentar retos grupales con estrategias compartidas.' },
-      { title: 'Reconocer el esfuerzo', description: 'Valorar la participación de cada integrante del equipo.' },
+      { title: 'Rutinas de estudio', description: 'Establecer horario y espacio fijo para las tareas.' },
+      { title: 'Preguntas que ayudan', description: 'Guiar sin dar la respuesta.' },
+      { title: 'Comunicación escuela-familia', description: 'Saber cuándo y cómo acercarse al docente.' },
     ],
-    details: [
-      { label: 'Fecha', value: 'Lunes 11 de mayo de 2026' },
-      { label: 'Horario', value: '10:00 AM - 12:00 PM' },
-      { label: 'Lugar', value: 'Salón de clases' },
-      { label: 'Dirigido a', value: 'Todos los grupos' },
-      { label: 'Costo', value: 'Actividad gratuita' },
-      { label: 'Cupo', value: 'Todo el grupo' },
-    ],
-    materials: ['Libreta de apuntes', 'Material que indique la maestra titular'],
-    image: galleryLectura,
-    gallery: [galleryCiencias, galleryDeportes, galleryCivismo],
+    materials: ['Libreta para notas'],
+    image: familyImage,
+    gallery: [galleryLectura, galleryArte, galleryCivismo],
     enCalendario: true,
-  },
-  {
-    title: 'Actividades en el aula',
+    formLink: 'https://forms.gle/PLACEHOLDER-REEMPLAZAR-CON-FORMULARIO',
+  }),
+  entrada({
+    title: 'Círculos de estudio entre pares',
+    category: 'Actividad Colaborativa',
+    tone: 'blue',
+    dateISO: '2026-01-21',
+    time: '11:30 AM - 11:50 AM (martes y jueves)',
+    location: 'Biblioteca escolar y salones de primaria',
+    audience: 'Tutores de 2° y 3° de secundaria; estudiantes de 1° a 3° de primaria',
+    description: 'Estudiantes de secundaria acompañan la lectura de estudiantes de primaria en sesiones cortas dos veces por semana.',
+    fullDescription: [
+      'Los círculos de estudio son nuestra forma de aplicar la tutoría entre pares, una estrategia con fuerte respaldo en la investigación educativa. Cada tutor de secundaria acompaña a uno o dos estudiantes de primaria durante 20 minutos.',
+      'Antes de iniciar, los tutores reciben dos sesiones de capacitación y una tarjeta con cuatro pasos: leer juntos, preguntar, elogiar y registrar. Consulta los resultados en la sección de Seguimiento.',
+    ],
+    highlight: 'Cuando un estudiante enseña a otro, los dos aprenden.',
+    objectives: [
+      { title: 'Mejorar la fluidez lectora', description: 'Más minutos de lectura acompañada para quien lo necesita.' },
+      { title: 'Desarrollar liderazgo', description: 'Los tutores asumen una responsabilidad real.' },
+      { title: 'Unir a los niveles', description: 'Convivencia positiva entre primaria y secundaria.' },
+    ],
+    materials: ['Libro de la biblioteca de aula', 'Tarjeta de registro del tutor'],
+    image: galleryLectura,
+    gallery: [galleryCivismo, galleryArte, galleryCiencias],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Asamblea escolar: el problema de la basura',
+    category: 'Aprendizaje Basado en Problemas',
+    tone: 'pink',
+    dateISO: '2026-02-18',
+    time: '10:00 AM - 12:00 PM',
+    location: 'Explanada principal',
+    audience: 'Secundaria (presenta) · 5° y 6° de primaria (participa)',
+    description: 'Los grupos de secundaria presentan su investigación y propuestas para reducir la basura en la escuela, y la comunidad vota las acciones.',
+    fullDescription: [
+      'Durante tres semanas, en Formación Cívica y Ética y Ciencias, los estudiantes de secundaria trabajaron con la metodología de aprendizaje basado en problemas: midieron cuánta basura se genera en un día, la clasificaron, investigaron alternativas y diseñaron propuestas.',
+      'En la asamblea cada grupo presenta una propuesta y la comunidad escolar vota. Es un ejercicio de participación democrática que forma parte del eje de pensamiento crítico y de la formación ciudadana.',
+    ],
+    highlight: 'La democracia se aprende practicándola: proponer, argumentar, escuchar y votar.',
+    objectives: [
+      { title: 'Investigar un problema real', description: 'Recolectar y analizar datos de la propia escuela.' },
+      { title: 'Argumentar con evidencia', description: 'Presentar propuestas sustentadas en datos.' },
+      { title: 'Participación democrática', description: 'Decidir en comunidad qué acciones realizar.' },
+    ],
+    materials: ['Carteles con los datos de cada grupo', 'Boletas de votación'],
+    image: galleryCivismo,
+    gallery: [galleryCiencias, galleryMatematicas, galleryLectura],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Rally matemático',
+    category: 'Actividad Académica',
+    tone: 'yellow',
+    dateISO: '2026-03-05',
+    time: '09:00 AM - 12:00 PM',
+    location: 'Patio y salones',
+    audience: 'Equipos mixtos de 3° de primaria a 3° de secundaria',
+    description: 'Retos de cálculo mental, geometría, patrones y lógica en 8 estaciones, con equipos que mezclan grados.',
+    fullDescription: [
+      'Cada equipo integra estudiantes de distintos grados y recorre 8 estaciones con retos de diferente dificultad: cálculo mental, armado de figuras con tangram, patrones numéricos, estimación, medición, fracciones con material concreto, acertijos lógicos y un problema final de secundaria.',
+      'El objetivo no es competir entre grupos sino mostrar que las matemáticas se pueden disfrutar y que cada integrante del equipo aporta algo distinto.',
+    ],
+    highlight: 'En un equipo mixto, el de 3° de primaria suele ver lo que al de secundaria se le escapa.',
+    objectives: [
+      { title: 'Gusto por las matemáticas', description: 'Resolver retos en un ambiente de juego.' },
+      { title: 'Colaboración entre grados', description: 'Aprovechar las distintas fortalezas del equipo.' },
+      { title: 'Estrategias propias', description: 'Explicar cómo se llegó a cada respuesta.' },
+    ],
+    materials: ['Lápiz y goma', 'Tabla de apoyo', 'Gorra y agua'],
+    image: galleryMatematicas,
+    gallery: [galleryDeportes, galleryCiencias, galleryLectura],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Maratón de lectura: Día Mundial del Libro',
     category: 'Actividad Académica',
     tone: 'green',
-    dateISO: '2026-05-08',
-    dateLabel: '8 de mayo de 2026',
+    dateISO: '2026-04-23',
     time: '08:00 AM - 01:00 PM',
-    location: 'Salón de clases',
-    description: 'Dinámicas de lectura, matemáticas y trabajo colaborativo para reforzar el aprendizaje diario en el aula.',
+    location: 'Toda la escuela',
+    audience: 'Todos los grupos y familias invitadas',
+    cupo: 'Abierto a familias',
+    description: 'Una mañana entera de lectura en voz alta, intercambio de libros y lectores invitados de la comunidad.',
     fullDescription: [
-      'Durante la semana reforzamos la lectura, las matemáticas y el trabajo colaborativo a través de dinámicas dentro del aula.',
-      'Estas actividades buscan afianzar los conocimientos vistos en clase de una forma práctica y participativa.',
+      'El 23 de abril, Día Mundial del Libro y del Derecho de Autor proclamado por la UNESCO, la escuela entera lee. Cada hora cambia la actividad: lectura en voz alta del docente, lectores invitados (familias, personas mayores de la comunidad), lectura en parejas entre primaria y secundaria y un tianguis de intercambio de libros.',
+      'Cerramos con una recomendación de cada grupo: el libro favorito del ciclo, presentado en un cartel.',
     ],
-    highlight: 'Aprender jugando también es aprender: cada actividad refuerza lo visto en clase.',
+    highlight: 'Cuando una comunidad lee junta, los estudiantes descubren que leer no es solo una tarea de la escuela.',
     objectives: [
-      { title: 'Reforzar el aprendizaje', description: 'Afianzar los temas vistos en clase de forma práctica.' },
-      { title: 'Fomentar la participación', description: 'Involucrar activamente a todo el grupo en cada dinámica.' },
-      { title: 'Reconocer el esfuerzo', description: 'Valorar el avance individual de cada estudiante.' },
+      { title: 'Fomentar el gusto por leer', description: 'Vivir la lectura como algo disfrutable y compartido.' },
+      { title: 'Involucrar a las familias', description: 'Invitar a la comunidad a leer en la escuela.' },
+      { title: 'Circular libros', description: 'Intercambiar libros que ya leímos por otros nuevos.' },
     ],
-    details: [
-      { label: 'Fecha', value: 'Viernes 8 de mayo de 2026' },
-      { label: 'Horario', value: '08:00 AM - 01:00 PM' },
-      { label: 'Lugar', value: 'Salón de clases' },
-      { label: 'Dirigido a', value: 'Todos los grupos' },
-      { label: 'Costo', value: 'Actividad gratuita' },
-      { label: 'Cupo', value: 'Todo el grupo' },
-    ],
-    materials: ['Libro de texto', 'Cuaderno y colores'],
-    image: galleryMatematicas,
+    materials: ['Un libro para intercambiar (opcional)', 'Cojín o tapete para leer'],
+    image: galleryLectura,
+    gallery: [galleryArte, galleryCivismo, galleryMatematicas],
     enCalendario: true,
-    gallery: [galleryLectura, galleryArte, galleryDeportes],
-  },
-  {
+  }),
+  entrada({
     title: 'Convivencia deportiva',
     category: 'Actividad Deportiva',
     tone: 'pink',
     dateISO: '2026-05-20',
-    dateLabel: '20 de mayo de 2026',
     time: '09:00 AM - 12:00 PM',
     location: 'Campo deportivo',
-    description: 'Jornada de juegos y deportes en equipo que fomenta la sana competencia, el compañerismo y el trabajo en equipo.',
+    audience: 'Todos los estudiantes y familias',
+    cupo: 'Abierto al público',
+    description: 'Jornada de juegos tradicionales y deportes en equipo que fomenta la actividad física, la sana competencia y el compañerismo.',
     fullDescription: [
-      'Una jornada de juegos y deportes en equipo, pensada para fomentar la sana competencia y el compañerismo entre todos los grupos.',
-      'Padres de familia están cordialmente invitados a acompañarnos y disfrutar de esta convivencia.',
+      'Primaria participa en juegos tradicionales (avión, resorte, carreras de costales, stop) y secundaria en torneos relámpago de fútbol, básquetbol y voleibol con equipos mixtos.',
+      'La Organización Mundial de la Salud recomienda que niñas, niños y adolescentes realicen al menos 60 minutos diarios de actividad física moderada a intensa; esta jornada también es una invitación a las familias para moverse juntas.',
     ],
     highlight: 'Lo importante no es solo ganar, sino disfrutar y crecer juntos como comunidad.',
     objectives: [
-      { title: 'Fomentar el deporte', description: 'Promover hábitos de actividad física y trabajo en equipo.' },
+      { title: 'Fomentar la actividad física', description: 'Promover hábitos de movimiento diario.' },
       { title: 'Fortalecer el compañerismo', description: 'Convivir de forma sana entre distintos grupos.' },
-      { title: 'Reconocer el esfuerzo', description: 'Valorar la participación y el espíritu deportivo.' },
+      { title: 'Rescatar juegos tradicionales', description: 'Compartir juegos que las familias conocen.' },
     ],
-    details: [
-      { label: 'Fecha', value: 'Miércoles 20 de mayo de 2026' },
-      { label: 'Horario', value: '09:00 AM - 12:00 PM' },
-      { label: 'Lugar', value: 'Campo deportivo' },
-      { label: 'Dirigido a', value: 'Todos los estudiantes y familias' },
-      { label: 'Costo', value: 'Actividad gratuita' },
-      { label: 'Cupo', value: 'Abierto al público' },
-    ],
-    materials: ['Ropa y calzado deportivo', 'Botella de agua'],
-    enCalendario: true,
+    materials: ['Ropa y calzado deportivo', 'Botella de agua', 'Gorra y bloqueador'],
     image: galleryDeportes,
     gallery: [galleryCiencias, galleryMatematicas, galleryCivismo],
-  },
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Feria de Ciencias STEAM 2026',
+    category: 'Actividad Académica',
+    tone: 'blue',
+    dateISO: '2026-05-28',
+    time: '09:00 AM - 01:00 PM',
+    location: 'Patio central',
+    audience: 'Todos los estudiantes y familias',
+    cupo: 'Abierto al público',
+    description: 'Presentación de proyectos de indagación de todos los grados, desde “¿qué flota?” en 1° de primaria hasta la calidad del agua en secundaria.',
+    fullDescription: [
+      'La Feria de Ciencias es el cierre de los proyectos de indagación con enfoque STEAM del ciclo. Cada proyecto sigue un ciclo completo: pregunta, predicción, experimento o registro, análisis de datos y conclusión.',
+      'Los estudiantes explican su proyecto al público; se evalúa el proceso con una lista de cotejo y no solo la presentación final. Todos los proyectos reciben reconocimiento.',
+    ],
+    highlight: '¡Ven, descubre y aprende con las preguntas y descubrimientos de nuestros estudiantes!',
+    objectives: [
+      { title: 'Fomentar la indagación', description: 'Formular preguntas y buscar respuestas con evidencia.' },
+      { title: 'Comunicar ciencia', description: 'Explicar a otros lo que se investigó.' },
+      { title: 'Integrar disciplinas', description: 'Unir ciencia, tecnología, arte y matemáticas.' },
+    ],
+    materials: ['Proyecto ya elaborado', 'Cartel con pregunta, hipótesis, datos y conclusión', 'Bitácora del proyecto'],
+    image: galleryCiencias,
+    gallery: [galleryLectura, galleryMatematicas, galleryArte],
+    enCalendario: true,
+  }),
 ];
 
 const civicEvents: ActivityEntry[] = [
-  {
+  entrada({
     title: 'Honores a la bandera',
     category: 'Evento Cívico',
     tone: 'blue',
-    dateISO: '2026-05-04',
-    dateLabel: '4 de mayo de 2026',
-    time: '08:00 AM - 08:30 AM',
+    dateISO: '2025-09-01',
+    time: '08:00 AM - 08:30 AM (todos los lunes)',
     location: 'Explanada principal',
-    description: 'Ceremonia mensual para reforzar nuestros valores cívicos y el respeto a los símbolos patrios.',
+    audience: 'Toda la comunidad escolar',
+    cupo: 'Abierto al público',
+    description: 'Ceremonia cívica de cada lunes. Un grupo distinto la conduce cada semana e incluye una efeméride explicada por los estudiantes.',
     fullDescription: [
-      'Cada mes realizamos la ceremonia de honores a la bandera como parte de la formación cívica de nuestros estudiantes.',
-      'Un grupo distinto participa cada mes en la escolta y en la conducción de la ceremonia.',
+      'Cada lunes realizamos honores a la bandera. El grupo responsable prepara la conducción, la efeméride de la semana y una breve reflexión relacionada con un valor o un derecho.',
+      'La rotación permite que todos los grupos, de 1° de primaria a 3° de secundaria, participen al menos una vez por trimestre. Para los más pequeños, la participación puede ser recitar una poesía o presentar un dibujo.',
     ],
     highlight: 'El respeto a nuestros símbolos patrios se construye todos los días, en comunidad.',
     objectives: [
-      { title: 'Fortalecer los valores cívicos', description: 'Promover el respeto a los símbolos patrios.' },
-      { title: 'Fomentar la participación', description: 'Involucrar a un grupo distinto cada mes en la ceremonia.' },
-      { title: 'Reconocer el esfuerzo', description: 'Valorar la disciplina de la escolta escolar.' },
+      { title: 'Formación cívica', description: 'Conocer y respetar los símbolos patrios.' },
+      { title: 'Expresión oral', description: 'Hablar en público con seguridad.' },
+      { title: 'Memoria histórica', description: 'Conocer las efemérides y su significado.' },
     ],
-    details: [
-      { label: 'Fecha', value: 'Lunes 4 de mayo de 2026' },
-      { label: 'Horario', value: '08:00 AM - 08:30 AM' },
-      { label: 'Lugar', value: 'Explanada principal' },
-      { label: 'Dirigido a', value: 'Toda la comunidad escolar' },
-      { label: 'Costo', value: 'Actividad gratuita' },
-      { label: 'Cupo', value: 'Abierto al público' },
-    ],
-    enCalendario: true,
     materials: ['Uniforme escolar completo'],
     image: galleryCivismo,
     gallery: [galleryArte, galleryLectura, galleryDeportes],
-  },
-  {
-    title: 'Arte y cultura',
-    category: 'Evento Cultural',
-    tone: 'yellow',
-    dateISO: '2026-04-24',
-    dateLabel: '24 de abril de 2026',
-    time: '10:00 AM - 01:00 PM',
-    location: 'Patio central',
-    description: 'Exposición de trabajos artísticos elaborados por nuestros estudiantes durante el ciclo escolar.',
-    fullDescription: [
-      'Nuestros estudiantes exponen pinturas, manualidades y trabajos artísticos elaborados durante el ciclo escolar.',
-      'Esta actividad busca fomentar la creatividad y el aprecio por las distintas expresiones artísticas y culturales.',
-    ],
-    highlight: 'El arte es otra forma de aprender, expresarse y descubrir el talento de cada estudiante.',
-    objectives: [
-      { title: 'Fomentar la creatividad', description: 'Dar espacio a distintas formas de expresión artística.' },
-      { title: 'Valorar la cultura', description: 'Promover el aprecio por el arte y las tradiciones.' },
-      { title: 'Reconocer el esfuerzo', description: 'Celebrar el trabajo creativo de cada estudiante.' },
-    ],
-    details: [
-      { label: 'Fecha', value: 'Viernes 24 de abril de 2026' },
-      { label: 'Horario', value: '10:00 AM - 01:00 PM' },
-      { label: 'Lugar', value: 'Patio central' },
-      { label: 'Dirigido a', value: 'Todos los estudiantes y familias' },
-      { label: 'Costo', value: 'Actividad gratuita' },
-      { label: 'Cupo', value: 'Abierto al público' },
-    ],
     enCalendario: true,
-    materials: ['Trabajo artístico ya elaborado', 'Material para su exhibición'],
-    image: galleryArte,
-    gallery: [galleryCivismo, galleryCiencias, galleryMatematicas],
-  },
-  {
-    title: 'Festival del Día del Estudiante',
+  }),
+  entrada({
+    title: 'Noche mexicana: celebración de fiestas patrias',
     category: 'Evento Cultural',
     tone: 'pink',
-    dateISO: '2026-05-16',
-    dateLabel: '16 de mayo de 2026',
+    dateISO: '2025-09-12',
+    time: '09:00 AM - 12:30 PM',
+    location: 'Explanada principal',
+    audience: 'Todos los estudiantes y familias',
+    cupo: 'Abierto al público',
+    description: 'Ceremonia por el inicio de la Independencia, bailes regionales, juegos de feria y antojitos preparados por las familias.',
+    fullDescription: [
+      'Como el 16 de septiembre es día de descanso, celebramos el viernes anterior. Iniciamos con una ceremonia cívica y la representación del inicio de la Independencia por un grupo de secundaria.',
+      'Después, cada grupo presenta un baile regional o una muestra cultural de un estado de la República que previamente investigó (ubicación, comida, vestimenta, música), lo que convierte la fiesta en un proyecto de Geografía e Historia.',
+    ],
+    highlight: 'Celebrar nuestra historia también es conocer la diversidad cultural del país.',
+    objectives: [
+      { title: 'Conocer nuestra historia', description: 'Recordar el inicio del movimiento de Independencia.' },
+      { title: 'Valorar la diversidad', description: 'Investigar y compartir la cultura de otros estados.' },
+      { title: 'Convivencia', description: 'Reunir a familias y escuela en un ambiente festivo.' },
+    ],
+    materials: ['Vestuario sencillo del baile asignado', 'Platillo para compartir (voluntario)'],
+    image: galleryArte,
+    gallery: [galleryCivismo, galleryDeportes, galleryLectura],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Simulacro Nacional',
+    category: 'Protección Civil',
+    tone: 'yellow',
+    dateISO: '2025-09-19',
+    time: '12:00 PM',
+    location: 'Toda la escuela',
+    audience: 'Toda la comunidad escolar',
+    description: 'Participamos en el Simulacro Nacional con una evacuación ordenada a los puntos de reunión.',
+    fullDescription: [
+      'Cada 19 de septiembre, en memoria de los sismos de 1985 y 2017, se realiza el Simulacro Nacional coordinado por Protección Civil. La escuela participa con la hipótesis de sismo y activa su plan de emergencia.',
+      'Antes del simulacro, cada grupo repasa las rutas de evacuación y las reglas “no corro, no grito, no empujo”. En primaria se refuerza con juegos; en secundaria, las brigadas estudiantiles apoyan en primeros auxilios, evacuación y conteo.',
+    ],
+    highlight: 'Practicar hoy nos prepara para actuar con calma cuando más se necesita.',
+    objectives: [
+      { title: 'Cultura de prevención', description: 'Saber qué hacer antes, durante y después de un sismo.' },
+      { title: 'Evacuación ordenada', description: 'Reducir el tiempo de evacuación.' },
+      { title: 'Brigadas escolares', description: 'Formar estudiantes y docentes responsables.' },
+    ],
+    materials: ['Ninguno: se evacúa sin mochila'],
+    image: galleryDeportes,
+    gallery: [galleryCivismo, galleryCiencias, galleryMatematicas],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Ofrenda de Día de Muertos y calaveritas literarias',
+    category: 'Evento Cultural',
+    tone: 'yellow',
+    dateISO: '2025-10-30',
+    time: '10:00 AM - 01:00 PM',
+    location: 'Patio central',
+    audience: 'Todos los estudiantes y familias',
+    cupo: 'Abierto al público',
+    description: 'Ofrenda monumental con fichas explicativas hechas por los estudiantes y concurso de calaveritas literarias.',
+    fullDescription: [
+      'La celebración del Día de Muertos fue inscrita por la UNESCO en la Lista del Patrimonio Cultural Inmaterial de la Humanidad en 2008. En la escuela la trabajamos como proyecto interdisciplinario: cada grupo investiga un elemento de la ofrenda y lo explica con una ficha.',
+      'Los grupos de 4° de primaria a 3° de secundaria participan en el concurso de calaveritas literarias, que sirve para practicar rima, métrica y humor respetuoso. Consulta el boletín de noviembre para ver cómo lo organizamos.',
+    ],
+    highlight: 'Recordar a quienes ya no están es también una forma de conocer quiénes somos.',
+    objectives: [
+      { title: 'Preservar la tradición', description: 'Conocer el origen y significado de la ofrenda.' },
+      { title: 'Escribir con creatividad', description: 'Componer calaveritas literarias con rima.' },
+      { title: 'Trabajo interdisciplinario', description: 'Unir historia, arte, ciencia y lenguaje.' },
+    ],
+    materials: ['Elemento de ofrenda asignado al grupo', 'Calaverita escrita (4° a secundaria)'],
+    image: galleryArte,
+    gallery: [galleryCivismo, galleryLectura, galleryCiencias],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Ceremonia y tabla rítmica: Revolución Mexicana',
+    category: 'Evento Cívico',
+    tone: 'blue',
+    dateISO: '2025-11-14',
+    time: '09:00 AM - 11:00 AM',
+    location: 'Explanada principal',
+    audience: 'Todos los estudiantes y familias',
+    cupo: 'Abierto al público',
+    description: 'Conmemoración del inicio de la Revolución Mexicana con tabla rítmica, activación física y líneas del tiempo hechas por secundaria.',
+    fullDescription: [
+      'Como el descanso oficial es el tercer lunes de noviembre, adelantamos la conmemoración al viernes. Primaria presenta tablas rítmicas y secundaria expone líneas del tiempo ilustradas de 1910 a 1917.',
+      'Los grupos de secundaria explican su línea del tiempo a un grupo de primaria: enseñar a otros consolida su propio aprendizaje.',
+    ],
+    highlight: 'Conocer las causas de la Revolución nos ayuda a entender los derechos que hoy tenemos.',
+    objectives: [
+      { title: 'Comprender la historia', description: 'Identificar causas y consecuencias de la Revolución.' },
+      { title: 'Actividad física', description: 'Preparar y presentar la tabla rítmica.' },
+      { title: 'Aprender enseñando', description: 'Secundaria explica a primaria.' },
+    ],
+    materials: ['Uniforme deportivo', 'Línea del tiempo (secundaria)'],
+    image: galleryDeportes,
+    gallery: [galleryCivismo, galleryArte, galleryLectura],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Día Naranja: por una escuela libre de violencia',
+    category: 'Evento Cívico',
+    tone: 'pink',
+    dateISO: '2025-11-25',
+    time: '08:00 AM - 09:00 AM',
+    location: 'Salones y explanada',
+    audience: 'Toda la comunidad escolar',
+    description: 'Actividades por nivel para promover la igualdad de género y prevenir la violencia contra mujeres y niñas.',
+    fullDescription: [
+      'El 25 de noviembre es el Día Internacional de la Eliminación de la Violencia contra la Mujer, y el día 25 de cada mes se conmemora el Día Naranja. La comunidad escolar viste una prenda naranja y cada grupo realiza una actividad breve.',
+      'En primaria: juegos y cuentos sobre reparto justo de tareas y respeto. En secundaria: análisis de estereotipos en canciones y publicidad, y elaboración de un decálogo de relaciones respetuosas. Se relaciona con el eje articulador de igualdad de género.',
+    ],
+    highlight: 'La igualdad se aprende desde el aula: en cómo nos hablamos, cómo trabajamos y cómo repartimos las tareas.',
+    objectives: [
+      { title: 'Igualdad de género', description: 'Reconocer y cuestionar estereotipos.' },
+      { title: 'Prevención de la violencia', description: 'Identificar situaciones de riesgo y a quién acudir.' },
+      { title: 'Convivencia respetuosa', description: 'Construir acuerdos de trato digno en el grupo.' },
+    ],
+    materials: ['Una prenda o listón naranja'],
+    image: galleryCivismo,
+    gallery: [galleryLectura, galleryArte, galleryDeportes],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Posada y convivio de fin de año',
+    category: 'Evento Cultural',
+    tone: 'green',
+    dateISO: '2025-12-18',
+    time: '10:00 AM - 01:00 PM',
+    location: 'Explanada principal',
+    audience: 'Todos los estudiantes y familias',
+    cupo: 'Abierto al público',
+    description: 'Pastorela presentada por secundaria, villancicos de primaria y convivio organizado con la asociación de familias.',
+    fullDescription: [
+      'Cerramos el primer periodo con una posada tradicional. Los grupos de secundaria presentan una pastorela escrita por ellos mismos (proyecto de Lenguajes) y los grupos de primaria cantan villancicos.',
+      'El convivio es organizado con la asociación de familias y se promueven alimentos saludables, de acuerdo con los lineamientos de alimentación escolar vigentes.',
+    ],
+    highlight: 'Cerrar el año juntos nos recuerda que la escuela es, antes que nada, una comunidad.',
+    objectives: [
+      { title: 'Convivencia', description: 'Compartir entre familias, estudiantes y docentes.' },
+      { title: 'Expresión artística', description: 'Escribir, ensayar y presentar una pastorela.' },
+      { title: 'Tradiciones', description: 'Conocer el origen de las posadas.' },
+    ],
+    materials: ['Vaso y plato reutilizables', 'Platillo saludable para compartir (voluntario)'],
+    image: galleryArte,
+    gallery: [galleryDeportes, galleryCivismo, galleryLectura],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Día Internacional de la Lengua Materna',
+    category: 'Evento Cultural',
+    tone: 'green',
+    dateISO: '2026-02-20',
+    time: '10:00 AM - 11:30 AM',
+    location: 'Biblioteca escolar',
+    audience: 'Todos los grupos y familias hablantes invitadas',
+    cupo: 'Abierto a familias',
+    description: 'Familias hablantes de lenguas originarias comparten cuentos, canciones y palabras con los estudiantes.',
+    fullDescription: [
+      'La UNESCO proclamó el 21 de febrero como Día Internacional de la Lengua Materna. En México se reconocen 68 lenguas indígenas nacionales, con cientos de variantes. Como el 21 cae en sábado, lo celebramos el viernes.',
+      'Invitamos a familias hablantes a compartir cuentos, canciones y palabras. Los estudiantes elaboran un diccionario ilustrado y en secundaria investigan qué lenguas se hablan en su municipio. Esta actividad se relaciona con el eje de interculturalidad crítica.',
+    ],
+    highlight: 'Cada lengua es una forma distinta de ver el mundo; cuidarla es cuidar nuestra riqueza cultural.',
+    objectives: [
+      { title: 'Valorar la diversidad lingüística', description: 'Reconocer las lenguas de la comunidad.' },
+      { title: 'Interculturalidad', description: 'Aprender de los saberes de las familias.' },
+      { title: 'Producción de textos', description: 'Elaborar un diccionario ilustrado.' },
+    ],
+    materials: ['Hojas y colores para el diccionario'],
+    image: galleryLectura,
+    gallery: [galleryArte, galleryCivismo, galleryCiencias],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Día de la Bandera y abanderamiento de la escolta',
+    category: 'Evento Cívico',
+    tone: 'blue',
+    dateISO: '2026-02-24',
+    time: '08:00 AM - 09:30 AM',
+    location: 'Explanada principal',
+    audience: 'Toda la comunidad escolar',
+    cupo: 'Abierto al público',
+    description: 'Ceremonia especial con cambio de escolta, juramento a la bandera y explicación de la historia de nuestro lábaro patrio.',
+    fullDescription: [
+      'El 24 de febrero se conmemora el Día de la Bandera. En la ceremonia la escolta saliente entrega la bandera a la nueva escolta, integrada por estudiantes de primaria y de secundaria.',
+      'Previamente, los grupos investigan la evolución de la bandera desde el estandarte de la Virgen de Guadalupe usado por Miguel Hidalgo hasta el diseño actual, y el significado de sus colores y su escudo.',
+    ],
+    highlight: 'La bandera nos representa a todas y todos: honrarla es comprometernos con nuestra comunidad.',
+    objectives: [
+      { title: 'Identidad nacional', description: 'Conocer la historia y el significado de la bandera.' },
+      { title: 'Responsabilidad', description: 'Reconocer a la nueva escolta y su compromiso.' },
+      { title: 'Participación', description: 'Involucrar a ambos niveles en la ceremonia.' },
+    ],
+    materials: ['Uniforme de gala'],
+    image: galleryCivismo,
+    gallery: [galleryArte, galleryDeportes, galleryLectura],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Natalicio de Benito Juárez y desfile de primavera',
+    category: 'Evento Cívico',
+    tone: 'yellow',
+    dateISO: '2026-03-20',
+    time: '09:00 AM - 11:30 AM',
+    location: 'Explanada y calles aledañas',
+    audience: 'Primaria (desfile) · secundaria (ceremonia)',
+    cupo: 'Abierto al público',
+    description: 'Ceremonia en memoria de Benito Juárez y recorrido de primavera por la comunidad con los grupos de primaria.',
+    fullDescription: [
+      'Benito Juárez nació el 21 de marzo de 1806 en San Pablo Guelatao, Oaxaca. Secundaria prepara una lectura en voz alta de fragmentos de su biografía y una reflexión sobre la frase “entre los individuos, como entre las naciones, el respeto al derecho ajeno es la paz”.',
+      'Los grupos de primaria realizan el tradicional desfile de primavera con disfraces elaborados con material reciclado, como parte del proyecto de cuidado ambiental.',
+    ],
+    highlight: 'Del respeto al derecho ajeno a la llegada de la primavera: un día para celebrar la vida en comunidad.',
+    objectives: [
+      { title: 'Memoria histórica', description: 'Conocer la vida y legado de Benito Juárez.' },
+      { title: 'Cuidado ambiental', description: 'Elaborar disfraces con material reciclado.' },
+      { title: 'Convivencia', description: 'Compartir con la comunidad el trabajo de los estudiantes.' },
+    ],
+    materials: ['Disfraz de material reciclado (primaria)', 'Gorra y agua'],
+    image: galleryArte,
+    gallery: [galleryCivismo, galleryCiencias, galleryDeportes],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Festival del Día de la Niña y el Niño',
+    category: 'Evento Cultural',
+    tone: 'pink',
+    dateISO: '2026-04-30',
     time: '09:00 AM - 01:00 PM',
     location: 'Explanada principal',
-    description: 'Celebremos juntos una jornada llena de actividades, juegos y sorpresas.',
+    audience: 'Todos los estudiantes y familias',
+    cupo: 'Abierto al público',
+    description: 'Juegos tradicionales, talleres y música, con estaciones organizadas por los estudiantes de secundaria.',
     fullDescription: [
-      'Como cada año, celebramos el Día del Estudiante con una jornada llena de juegos, concursos y sorpresas para toda la comunidad escolar.',
-      'Habrá actividades deportivas, culturales y reconocimientos para los alumnos destacados del ciclo escolar.',
+      'Como cada año, celebramos a niñas, niños y adolescentes con una jornada llena de juegos, talleres y sorpresas. Los estudiantes de secundaria diseñan y dirigen las estaciones de juego para primaria.',
+      'Aprovechamos para recordar los derechos de la infancia establecidos en la Convención sobre los Derechos del Niño y en la Ley General de los Derechos de Niñas, Niños y Adolescentes.',
     ],
     highlight: 'Un día para celebrar a quienes son el corazón de nuestra escuela: nuestros estudiantes.',
     objectives: [
-      { title: 'Celebrar a los estudiantes', description: 'Dedicar una jornada especial a la comunidad estudiantil.' },
-      { title: 'Fomentar la convivencia', description: 'Reunir a estudiantes y familias en un ambiente festivo.' },
-      { title: 'Reconocer el esfuerzo', description: 'Premiar a los alumnos destacados del ciclo escolar.' },
-    ],
-    details: [
-      { label: 'Fecha', value: 'Sábado 16 de mayo de 2026' },
-      { label: 'Horario', value: '09:00 AM - 01:00 PM' },
-      { label: 'Lugar', value: 'Explanada principal' },
-      { label: 'Dirigido a', value: 'Todos los estudiantes y familias' },
-      { label: 'Costo', value: 'Actividad gratuita' },
-      { label: 'Cupo', value: 'Abierto al público' },
+      { title: 'Celebrar a la infancia', description: 'Dedicar una jornada especial a los estudiantes.' },
+      { title: 'Conocer sus derechos', description: 'Recordar el derecho a jugar, aprender y participar.' },
+      { title: 'Liderazgo de secundaria', description: 'Organizar actividades para los más pequeños.' },
     ],
     materials: ['Ropa cómoda'],
     image: trophyImage,
@@ -871,8 +1857,58 @@ const civicEvents: ActivityEntry[] = [
     // Ya está ligado a un aviso (abajo), y ese aviso ya se agrega solo al
     // calendario — no marcamos enCalendario aquí para no duplicar la
     // misma fecha dos veces.
-    announcement: announcements.find((a) => a.title === 'Festival del Día del Estudiante'),
-  },
+    announcement: announcements.find((a) => a.title === 'Festival del Día de la Niña y el Niño'),
+  }),
+  entrada({
+    title: 'Festival del Día de las Madres',
+    category: 'Evento Cultural',
+    tone: 'green',
+    dateISO: '2026-05-08',
+    time: '10:00 AM - 12:00 PM',
+    location: 'Explanada principal',
+    audience: 'Familias de toda la escuela',
+    cupo: 'Abierto al público',
+    description: 'Bailes, poesía y cartas escritas por los estudiantes para sus mamás y las personas que los cuidan.',
+    fullDescription: [
+      'Como el 10 de mayo cae en domingo, el festival se realiza el viernes 8. Los grupos presentan bailes, poesías y canciones. Cada estudiante entrega una carta escrita en clase, que forma parte de un proyecto de producción de textos.',
+      'Reconocemos que en muchas familias quien cuida es una abuela, una tía, un papá u otra persona: todas están invitadas y todas son celebradas.',
+    ],
+    highlight: 'Honramos a quienes nos cuidan: todas las familias son bienvenidas.',
+    objectives: [
+      { title: 'Expresión afectiva', description: 'Escribir y compartir mensajes de gratitud.' },
+      { title: 'Expresión artística', description: 'Presentar bailes y poesías.' },
+      { title: 'Inclusión', description: 'Reconocer la diversidad de las familias.' },
+    ],
+    materials: ['Vestuario sencillo del número asignado'],
+    image: familyImage,
+    gallery: [galleryArte, galleryLectura, galleryCivismo],
+    enCalendario: true,
+  }),
+  entrada({
+    title: 'Ceremonia de fin de cursos',
+    category: 'Evento Cívico',
+    tone: 'blue',
+    dateISO: '2026-07-10',
+    time: '09:00 AM - 11:30 AM',
+    location: 'Explanada principal',
+    audience: 'Generación 2026 de 6° de primaria y 3° de secundaria, y sus familias',
+    cupo: '3 acompañantes por estudiante',
+    description: 'Despedida de la generación que concluye la primaria y la secundaria, con honores, entrega simbólica de documentos y mensaje de los estudiantes.',
+    fullDescription: [
+      'Celebramos a los estudiantes que concluyen una etapa. La ceremonia incluye honores a la bandera, entrega simbólica de documentos, reconocimientos a la generación y un mensaje escrito por los propios estudiantes.',
+      'La escolta saliente entrega la bandera a quienes la portarán el siguiente ciclo, simbolizando la continuidad de nuestra comunidad escolar.',
+    ],
+    highlight: 'Terminar una etapa es comenzar otra: les deseamos lo mejor en su nuevo camino.',
+    objectives: [
+      { title: 'Reconocer el esfuerzo', description: 'Celebrar la conclusión de un nivel educativo.' },
+      { title: 'Motivar a continuar', description: 'Animar a seguir estudiando en el siguiente nivel.' },
+      { title: 'Cerrar en comunidad', description: 'Compartir el logro con familias y docentes.' },
+    ],
+    materials: ['Uniforme de gala'],
+    image: trophyImage,
+    gallery: [galleryCivismo, galleryArte, galleryLectura],
+    announcement: announcements.find((a) => a.title === 'Ceremonia de fin de cursos'),
+  }),
 ];
 
 // El Calendario Escolar se arma solo, a partir del contenido que ya existe
@@ -1022,10 +2058,23 @@ const carouselGalleryPhotos = [...galleryPhotos]
    ========================================================================= */
 
 const schoolValues = [
-  { title: 'Docente', description: 'Formación de calidad en Telesecundaria, con acompañamiento cercano en cada grado.' },
-  { title: 'Compromiso', description: 'Trabajamos por el desarrollo integral de cada estudiante, dentro y fuera del aula.' },
-  { title: 'Aprendizaje', description: 'Buscamos que lo aprendido tenga sentido y utilidad para la vida diaria.' },
-  { title: 'Comunidad', description: 'Escuela, familias y sociedad avanzando juntos hacia el mismo objetivo.' },
+  { title: 'Docencia cercana', description: 'En telesecundaria un mismo docente acompaña al grupo en todas sus asignaturas; en primaria, el docente titular conoce a cada estudiante y a su familia.' },
+  { title: 'Compromiso', description: 'Trabajamos por el desarrollo integral de cada estudiante, dentro y fuera del aula, desde 1° de primaria hasta 3° de secundaria.' },
+  { title: 'Aprendizaje con sentido', description: 'Partimos de los problemas y saberes de nuestra comunidad para que lo aprendido sea útil en la vida diaria.' },
+  { title: 'Comunidad', description: 'Escuela, familias y comunidad avanzando juntas hacia el mismo objetivo.' },
+];
+
+// Los siete ejes articuladores del Plan de Estudios 2022 (Nueva Escuela
+// Mexicana). Atraviesan todos los campos formativos y todos los grados;
+// aquí se describen con ejemplos de cómo los trabajamos en la escuela.
+const pedagogicalAxes = [
+  { title: 'Inclusión', description: 'Ajustamos actividades para que todos participen, con apoyos para estudiantes que lo necesitan.' },
+  { title: 'Pensamiento crítico', description: 'Asambleas escolares y proyectos donde los estudiantes argumentan con evidencia.' },
+  { title: 'Interculturalidad crítica', description: 'Valoramos las lenguas, saberes y tradiciones de las familias de la comunidad.' },
+  { title: 'Igualdad de género', description: 'Reparto justo de tareas, Día Naranja y análisis de estereotipos.' },
+  { title: 'Vida saludable', description: 'Huerto escolar, activación física y alimentación sin productos chatarra.' },
+  { title: 'Apropiación de las culturas a través de la lectura y la escritura', description: '20 minutos diarios de lectura en toda la escuela y tutoría lectora entre pares.' },
+  { title: 'Artes y experiencias estéticas', description: 'Ofrendas, pastorelas, bailes regionales y exposiciones de trabajos.' },
 ];
 
 type GradePlan = { grade: string; focus: string; subjects: string[] };
@@ -1033,9 +2082,14 @@ type GradePlan = { grade: string; focus: string; subjects: string[] };
 // Cada nivel educativo es un bloque independiente con su propia
 // condicional "show": para agregar un nivel nuevo (o quitarlo de la
 // vista sin perder su información) solo hay que sumar/editar un objeto
-// en este arreglo. Hoy la escuela solo ofrece Secundaria (Telesecundaria),
-// así que "Primaria" queda ya preparada pero oculta — para publicarla,
-// cambia su "show" a true y revisa/ajusta las asignaturas de cada grado.
+// en este arreglo. La escuela atiende primaria y secundaria
+// (telesecundaria), así que ambos niveles están visibles.
+//
+// Contenido basado en el Plan de Estudio 2022 (Nueva Escuela Mexicana):
+// la primaria se organiza en Fases 3, 4 y 5 y la secundaria en la Fase 6,
+// siempre con cuatro campos formativos (Lenguajes; Saberes y Pensamiento
+// Científico; Ética, Naturaleza y Sociedades; De lo Humano y lo
+// Comunitario). En secundaria, cada campo se trabaja por disciplinas.
 type EducationLevel = {
   name: string;
   description: string;
@@ -1045,63 +2099,61 @@ type EducationLevel = {
 
 const educationLevels: EducationLevel[] = [
   {
-    name: 'Secundaria (Telesecundaria)',
-    description: 'Tres grados, de 1° a 3°, con el modelo de telesecundaria.',
+    name: 'Primaria',
+    description: 'Seis grados, de 1° a 6°, organizados en tres fases del Plan de Estudio 2022. Los libros de texto se trabajan por proyectos (de aula, escolares y comunitarios).',
     show: true,
     grades: [
       {
-        grade: '1er Grado',
-        focus: 'La base: adaptación al modelo de Telesecundaria y a las herramientas de estudio.',
-        subjects: ['Lengua Materna y Literatura I', 'Matemáticas I', 'Ciencias y Tecnología I (Biología)', 'Geografía', 'Formación Cívica y Ética I', 'Inglés I', 'Artes I', 'Educación Física I', 'Tecnología I'],
+        grade: '1er Grado · Fase 3',
+        focus: 'Adquisición de la lectura y la escritura, conteo y primeras nociones de número, a partir del juego y la exploración.',
+        subjects: ['Lenguajes (lectoescritura, expresión oral, artes)', 'Saberes y Pensamiento Científico (número, forma, cuerpo humano)', 'Ética, Naturaleza y Sociedades (familia, comunidad)', 'De lo Humano y lo Comunitario (emociones, juego, educación física)'],
       },
       {
-        grade: '2do Grado',
-        focus: 'Se profundiza el análisis y se suma la perspectiva histórica del país y el mundo.',
-        subjects: ['Lengua Materna y Literatura II', 'Matemáticas II', 'Ciencias y Tecnología II (Física)', 'Historia I', 'Formación Cívica y Ética II', 'Inglés II', 'Artes II', 'Educación Física II', 'Tecnología II'],
+        grade: '2do Grado · Fase 3',
+        focus: 'Consolidación de la lectoescritura, suma y resta, y exploración del entorno natural y social.',
+        subjects: ['Lenguajes (lectura, escritura de textos breves, inglés inicial)', 'Saberes y Pensamiento Científico (suma, resta, medición, seres vivos)', 'Ética, Naturaleza y Sociedades (derechos, cuidado del ambiente)', 'De lo Humano y lo Comunitario (convivencia, hábitos saludables)'],
       },
       {
-        grade: '3er Grado',
-        focus: 'Cierre del ciclo: consolidación académica y orientación hacia la siguiente etapa educativa.',
-        subjects: ['Lengua Materna y Literatura III', 'Matemáticas III', 'Ciencias y Tecnología III (Química)', 'Historia II', 'Formación Cívica y Ética III', 'Inglés III', 'Artes III', 'Educación Física III', 'Tecnología III'],
+        grade: '3er Grado · Fase 4',
+        focus: 'Mayor autonomía en la lectura, multiplicación y primeras investigaciones sobre la comunidad.',
+        subjects: ['Lenguajes (textos informativos, narrativos, inglés)', 'Saberes y Pensamiento Científico (multiplicación, fracciones sencillas, materiales)', 'Ética, Naturaleza y Sociedades (historia de la comunidad, entidad)', 'De lo Humano y lo Comunitario (educación socioemocional, vida saludable)'],
+      },
+      {
+        grade: '4to Grado · Fase 4',
+        focus: 'Comprensión lectora, división y fracciones; conocimiento de la entidad y su diversidad.',
+        subjects: ['Lenguajes (argumentación oral, reseñas, inglés)', 'Saberes y Pensamiento Científico (división, fracciones, ecosistemas)', 'Ética, Naturaleza y Sociedades (geografía e historia de la entidad)', 'De lo Humano y lo Comunitario (toma de decisiones, actividad física)'],
+      },
+      {
+        grade: '5to Grado · Fase 5',
+        focus: 'Análisis de textos, operaciones con fracciones y decimales, y estudio de México en el tiempo.',
+        subjects: ['Lenguajes (textos expositivos, debate, inglés)', 'Saberes y Pensamiento Científico (fracciones, decimales, energía, sexualidad y salud)', 'Ética, Naturaleza y Sociedades (historia de México, diversidad cultural)', 'De lo Humano y lo Comunitario (proyecto de vida, cuidado de sí)'],
+      },
+      {
+        grade: '6to Grado · Fase 5',
+        focus: 'Cierre de la primaria: proporcionalidad, proyectos de investigación y preparación para la secundaria.',
+        subjects: ['Lenguajes (investigación, textos argumentativos, inglés)', 'Saberes y Pensamiento Científico (proporcionalidad, porcentajes, universo)', 'Ética, Naturaleza y Sociedades (México y el mundo, ciudadanía)', 'De lo Humano y lo Comunitario (transición a secundaria, orientación)'],
       },
     ],
   },
   {
-    name: 'Primaria',
-    description: 'Seis grados, de 1° a 6°.',
-    // Oculto hasta que la escuela ofrezca este nivel. La información ya
-    // está cargada para no partir de cero cuando llegue el momento.
-    show: false,
+    name: 'Secundaria (Telesecundaria)',
+    description: 'Tres grados, de 1° a 3° (Fase 6). Un mismo docente atiende todas las disciplinas del grupo, con apoyo de materiales audiovisuales y libros propios del modelo.',
+    show: true,
     grades: [
       {
-        grade: '1er Grado',
-        focus: 'Primeros pasos en la lectura, la escritura y el conteo.',
-        subjects: ['Lengua Materna I', 'Matemáticas I', 'Conocimiento del Medio I', 'Formación Cívica y Ética I', 'Educación Socioemocional I', 'Artes I', 'Educación Física I', 'Inglés I'],
+        grade: '1er Grado · Fase 6',
+        focus: 'Adaptación al modelo de telesecundaria, hábitos de estudio y bases de biología y geografía.',
+        subjects: ['Español I', 'Inglés I', 'Artes I', 'Matemáticas I', 'Biología', 'Geografía', 'Historia I', 'Formación Cívica y Ética I', 'Tecnología I', 'Educación Física I', 'Tutoría y Educación Socioemocional I'],
       },
       {
-        grade: '2do Grado',
-        focus: 'Se afianza la lectoescritura y las operaciones básicas.',
-        subjects: ['Lengua Materna II', 'Matemáticas II', 'Conocimiento del Medio II', 'Formación Cívica y Ética II', 'Educación Socioemocional II', 'Artes II', 'Educación Física II', 'Inglés II'],
+        grade: '2do Grado · Fase 6',
+        focus: 'Se profundiza el análisis, se inicia el álgebra formal y el estudio de la física.',
+        subjects: ['Español II', 'Inglés II', 'Artes II', 'Matemáticas II', 'Física', 'Historia II', 'Formación Cívica y Ética II', 'Tecnología II', 'Educación Física II', 'Tutoría y Educación Socioemocional II'],
       },
       {
-        grade: '3er Grado',
-        focus: 'Cierre del primer ciclo, con mayor autonomía en el trabajo escolar.',
-        subjects: ['Lengua Materna III', 'Matemáticas III', 'Conocimiento del Medio III', 'Formación Cívica y Ética III', 'Educación Socioemocional III', 'Artes III', 'Educación Física III', 'Inglés III'],
-      },
-      {
-        grade: '4to Grado',
-        focus: 'Se separan Ciencias Naturales, Geografía e Historia como asignaturas propias.',
-        subjects: ['Lengua Materna IV', 'Matemáticas IV', 'Ciencias Naturales I', 'Geografía I', 'Historia I', 'Formación Cívica y Ética IV', 'Educación Socioemocional IV', 'Artes IV', 'Educación Física IV', 'Inglés IV'],
-      },
-      {
-        grade: '5to Grado',
-        focus: 'Mayor profundidad y análisis en cada asignatura.',
-        subjects: ['Lengua Materna V', 'Matemáticas V', 'Ciencias Naturales II', 'Geografía II', 'Historia II', 'Formación Cívica y Ética V', 'Educación Socioemocional V', 'Artes V', 'Educación Física V', 'Inglés V'],
-      },
-      {
-        grade: '6to Grado',
-        focus: 'Cierre de la primaria y preparación para el paso a Secundaria.',
-        subjects: ['Lengua Materna VI', 'Matemáticas VI', 'Ciencias Naturales III', 'Geografía III', 'Historia III', 'Formación Cívica y Ética VI', 'Educación Socioemocional VI', 'Artes VI', 'Educación Física VI', 'Inglés VI'],
+        grade: '3er Grado · Fase 6',
+        focus: 'Cierre de la educación básica: química, consolidación académica y orientación hacia la educación media superior.',
+        subjects: ['Español III', 'Inglés III', 'Artes III', 'Matemáticas III', 'Química', 'Historia III', 'Formación Cívica y Ética III', 'Tecnología III', 'Educación Física III', 'Tutoría y Educación Socioemocional III'],
       },
     ],
   },
@@ -1122,7 +2174,7 @@ function App() {
   const [boletinCategory, setBoletinCategory] = useState('Todos');
   const [boletinYear, setBoletinYear] = useState('Todos');
   const [boletinSort, setBoletinSort] = useState<'recientes' | 'alfabetico'>('recientes');
-  const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 4, 1));
+  const [calendarMonth, setCalendarMonth] = useState(new Date(2025, 8, 1));
   const [calendarViewMode, setCalendarViewMode] = useState<'mes' | 'lista'>('mes');
   const [calendarTooltip, setCalendarTooltip] = useState<{ events: CalendarEvent[]; x: number; y: number } | null>(null);
   const [detailStudy, setDetailStudy] = useState<Study | null>(null);
@@ -1369,6 +2421,7 @@ function App() {
       case 'Actividades escolares': return <Star size={15} />;
       case 'Eventos especiales': return <Calendar size={15} />;
       case 'Logros y reconocimientos': return <GraduationCap size={15} />;
+      case 'Guía docente': return <Lightbulb size={15} />;
       default: return <Newspaper size={15} />;
     }
   };
@@ -1475,6 +2528,51 @@ function App() {
         }
       };
 
+      // Entrada tipo blog (si el boletín la trae) y sugerencias para el aula.
+      (newsletter.article ?? []).forEach((section) => {
+        ensureSpace(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...darkPurple);
+        const headingLines = doc.splitTextToSize(section.heading, contentWidth);
+        doc.text(headingLines, marginX, y);
+        y += headingLines.length * 6.5 + 3;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        doc.setTextColor(...ink);
+        section.paragraphs.forEach((paragraph) => {
+          const paragraphLines: string[] = doc.splitTextToSize(paragraph, contentWidth);
+          paragraphLines.forEach((line) => {
+            ensureSpace(6);
+            doc.text(line, marginX, y);
+            y += 5.6;
+          });
+          y += 3;
+        });
+        y += 3;
+      });
+
+      if (newsletter.classroomTips && newsletter.classroomTips.length > 0) {
+        ensureSpace(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...darkPurple);
+        doc.text('Para llevar a tu aula', marginX, y);
+        y += 9;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        newsletter.classroomTips.forEach((tip) => {
+          const tipLines = doc.splitTextToSize(tip, contentWidth - 8);
+          ensureSpace(tipLines.length * 6 + 4);
+          doc.setFillColor(...purple);
+          doc.circle(marginX + 1.4, y - 1.6, 1.1, 'F');
+          doc.setTextColor(...ink);
+          doc.text(tipLines, marginX + 6, y);
+          y += tipLines.length * 6 + 4;
+        });
+        y += 4;
+      }
+
       // Lista de anuncios importantes.
       ensureSpace(14);
       doc.setFont('helvetica', 'bold');
@@ -1575,7 +2673,7 @@ function App() {
                     <span className="upcoming-content">
                       <small>{announcement.label}</small>
                       <strong>{announcement.title}</strong>
-                      <em>{announcement.date} de mayo</em>
+                      <em>{diaMes(announcement.dateISO)}</em>
                       <button className="small-action" onClick={() => openDetail(announcement)}>Ver más <ArrowRight size={13} /></button>
                     </span>
                     <img className="upcoming-image" src={announcement.image} alt="" />
@@ -1767,7 +2865,7 @@ function App() {
                 <div className="avisos-card-media">
                   <img src={announcement.image} alt="" />
                   <span className={`avisos-card-badge eyebrow-${announcement.tone}`}>{announcement.label}</span>
-                  <span className="avisos-card-date"><Calendar size={12} /> {announcement.date} de mayo</span>
+                  <span className="avisos-card-date"><Calendar size={12} /> {diaMes(announcement.dateISO)}</span>
                 </div>
                 <div className="avisos-card-body">
                   <h3>{announcement.title}</h3>
@@ -1849,7 +2947,7 @@ function App() {
                     <img src={announcement.image} alt="" />
                     <span>
                       <strong>{announcement.title}</strong>
-                      <em>{announcement.date} de mayo</em>
+                      <em>{diaMes(announcement.dateISO)}</em>
                     </span>
                   </button>
                 ))}
@@ -1919,6 +3017,7 @@ function App() {
               </label>
               <select className="boletin-select" value={boletinYear} onChange={(event) => setBoletinYear(event.target.value)} aria-label="Filtrar por año">
                 <option value="Todos">Todos los años</option>
+                <option value="2025">2025</option>
                 <option value="2026">2026</option>
               </select>
               <select className="boletin-select" value={boletinCategory} onChange={(event) => setBoletinCategory(event.target.value)} aria-label="Filtrar por categoría">
@@ -1983,7 +3082,9 @@ function App() {
 
             <div className="sidebar-card">
               <h3>Archivo por año</h3>
-              <div className="sidebar-archive-item"><span>2026</span><em>{newsletters.length}</em></div>
+              {['2026', '2025'].map((year) => (
+                <div className="sidebar-archive-item" key={year}><span>{year}</span><em>{newsletters.filter((n) => n.dateISO.startsWith(year)).length}</em></div>
+              ))}
             </div>
 
             <div className="sidebar-card">
@@ -2045,6 +3146,22 @@ function App() {
                   <footer>— {detailNewsletter.messageAuthor}</footer>
                 </blockquote>
               </div>
+
+              {detailNewsletter.article?.map((section) => (
+                <div className="aviso-detail-section" key={section.heading}>
+                  <h2><FileText size={17} /> {section.heading}</h2>
+                  {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                </div>
+              ))}
+
+              {detailNewsletter.classroomTips && detailNewsletter.classroomTips.length > 0 && (
+                <div className="aviso-detail-section">
+                  <h2><Lightbulb size={17} /> Para llevar a tu aula</h2>
+                  <ul className="aviso-detail-bullets">
+                    {detailNewsletter.classroomTips.map((tip) => <li key={tip}>{tip}</li>)}
+                  </ul>
+                </div>
+              )}
 
               <div className="aviso-detail-section">
                 <h2><Star size={17} /> Noticias destacadas</h2>
@@ -2578,6 +3695,24 @@ function App() {
                   “{detailStudy.highlight}”
                 </blockquote>
               </div>
+
+              {detailStudy.steps && detailStudy.steps.length > 0 && (
+                <div className="aviso-detail-section">
+                  <h2><List size={17} /> Cómo replicarlo en tu escuela</h2>
+                  <ol className="aviso-detail-bullets">
+                    {detailStudy.steps.map((step) => <li key={step}>{step}</li>)}
+                  </ol>
+                </div>
+              )}
+
+              {detailStudy.sources && detailStudy.sources.length > 0 && (
+                <div className="aviso-detail-section">
+                  <h2><FileText size={17} /> Referencias</h2>
+                  <ul className="aviso-detail-bullets">
+                    {detailStudy.sources.map((source) => <li key={source}>{source}</li>)}
+                  </ul>
+                </div>
+              )}
             </div>
           </article>
 
@@ -3223,11 +4358,11 @@ function App() {
               <span className="boletines-hero-icon-badge"><img src={schoolIllustration} alt="" /></span>
               <h1>Nosotros</h1>
             </div>
-            <p>Conoce nuestra historia, nuestra misión y visión, y lo que nuestros estudiantes aprenden en cada grado de la Telesecundaria.</p>
+            <p>Conoce nuestra historia, nuestra misión y visión, nuestro modelo pedagógico y lo que nuestros estudiantes aprenden en cada grado de primaria y telesecundaria.</p>
             <div className="boletines-features">
               <div className="boletines-feature">
                 <span className="boletines-feature-icon"><GraduationCap size={16} /></span>
-                <span><strong>Telesecundaria</strong><small>Primero, segundo y tercer grado.</small></span>
+                <span><strong>Primaria y Telesecundaria</strong><small>De 1° de primaria a 3° de secundaria.</small></span>
               </div>
               <div className="boletines-feature">
                 <span className="boletines-feature-icon"><Heart size={16} /></span>
@@ -3252,9 +4387,9 @@ function App() {
             <div className="aviso-detail-body">
               <div className="aviso-detail-section" style={{ marginTop: 0, paddingTop: 0, borderTop: 0 }}>
                 <h2><Clock size={17} /> Nuestra Historia</h2>
-                <p>La Telesecundaria Julián Carrillo nació con un propósito claro: llevar educación secundaria de calidad a nuestra comunidad, combinando el modelo de telesecundaria (clases apoyadas en materiales audiovisuales) con el acompañamiento cercano de nuestros docentes en el salón, día a día.</p>
-                <p>A lo largo de los ciclos escolares hemos crecido junto con las familias que confían en nosotros, sumando actividades académicas, deportivas, cívicas y culturales que buscan formar no solo mejores estudiantes, sino mejores personas.</p>
-                <p>Hoy seguimos con el mismo compromiso: ofrecer una educación cercana, participativa y en constante mejora para cada generación que pasa por nuestras aulas.</p>
+                <p>La Telesecundaria Julián Carrillo nació con un propósito claro: llevar educación secundaria de calidad a nuestra comunidad con el modelo de telesecundaria, creado en México en 1968 para que los jóvenes de comunidades rurales y semiurbanas pudieran continuar sus estudios sin salir de su localidad. En este modelo, un mismo docente acompaña al grupo en todas sus asignaturas, con apoyo de materiales audiovisuales y libros propios.</p>
+                <p>Con el tiempo, la escuela creció para atender también la primaria. Hoy acompañamos a nuestros estudiantes desde 1° de primaria hasta 3° de secundaria: nueve años en la misma comunidad escolar. Esto nos permite dar continuidad a su aprendizaje, conocer de cerca a cada familia y organizar actividades donde los estudiantes mayores apoyan a los más pequeños.</p>
+                <p>Trabajamos con el Plan de Estudio 2022 de la Nueva Escuela Mexicana: partimos de los problemas y saberes de nuestra comunidad, organizamos el trabajo por proyectos y buscamos formar no solo mejores estudiantes, sino mejores personas. Compartimos aquí nuestras experiencias para que puedan ser útiles a docentes de otras escuelas.</p>
               </div>
 
               <div className="aviso-detail-section">
@@ -3287,8 +4422,28 @@ function App() {
               </div>
 
               <div className="aviso-detail-section">
+                <h2><Lightbulb size={17} /> Nuestro modelo pedagógico: los ejes articuladores</h2>
+                <p>Los siete ejes articuladores de la Nueva Escuela Mexicana atraviesan todos los grados y campos formativos. Así los vivimos en la escuela:</p>
+                <div className="nosotros-values-grid">
+                  {pedagogicalAxes.map((axis, index) => {
+                    const icons = [UsersRound, Brain, Heart, Star, Target, FileText, Lightbulb];
+                    const AxisIcon = icons[index % icons.length];
+                    return (
+                      <div className="activity-objective" key={axis.title}>
+                        <span className="activity-objective-icon"><AxisIcon size={17} /></span>
+                        <div>
+                          <strong>{axis.title}</strong>
+                          <p>{axis.description}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="aviso-detail-section">
                 <h2><GraduationCap size={17} /> ¿Qué aprenderán? Plan de estudios por grado</h2>
-                <p>Estas son algunas de las principales asignaturas que se cursan en cada grado:</p>
+                <p>Con base en el Plan de Estudio 2022, el aprendizaje se organiza en cuatro campos formativos: Lenguajes; Saberes y Pensamiento Científico; Ética, Naturaleza y Sociedades; y De lo Humano y lo Comunitario. En primaria se trabajan de forma integrada por proyectos; en secundaria, cada campo se desarrolla por disciplinas.</p>
                 {visibleEducationLevels.map((level) => (
                   <div className="grade-level-block" key={level.name}>
                     {visibleEducationLevels.length > 1 && (
